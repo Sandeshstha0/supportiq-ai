@@ -1,0 +1,48 @@
+
+:host {
+  display: block;
+  flex: 0 0 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+/* Only recent conversations should scroll */
+.custom-scrollbar {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #29465d transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #29465d;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+.nav-item {
+  transition: all 0.25s ease;
+}
+
+.nav-item:active {
+  transform: scale(0.98);
+}

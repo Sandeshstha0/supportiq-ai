@@ -1,0 +1,38 @@
+
+import { Component, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-chat-input',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './chat-input.html',
+  styleUrl: './chat-input.scss'
+})
+export class ChatInput {
+
+  message = signal('');
+
+  messageSent = output<string>();
+
+  isLoading = signal(false);
+
+  sendMessage(): void {
+    const text = this.message().trim();
+
+    if (!text || this.isLoading()) {
+      return;
+    }
+
+    this.messageSent.emit(text);
+    this.message.set('');
+  }
+
+  handleKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
+  }
+
+}

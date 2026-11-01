@@ -1,0 +1,40 @@
+
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.welcome-container {
+  isolation: isolate;
+}
+
+/* Gentle floating animation */
+.ai-orb {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Suggestion cards */
+.suggestion-card {
+  backdrop-filter: blur(12px);
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+  .ai-orb {
+    animation: none;
+  }
+
+  .suggestion-card {
+    transition: none;
+  }
+}

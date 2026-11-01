@@ -1,0 +1,23 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.composer-box {
+  backdrop-filter: blur(16px);
+}
+
+textarea {
+  scrollbar-width: thin;
+  scrollbar-color: #29465d transparent;
+}
+
+textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: #29465d;
+  border-radius: 20px;
+}

@@ -1,0 +1,43 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.message-bubble {
+  overflow-wrap: anywhere;
+  animation: messageAppear 0.25s ease-out;
+}
+
+.user-bubble {
+  color: #082033;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 5px 20px rgba(56, 189, 248, 0.08);
+}
+
+.assistant-bubble {
+  color: #e2e8f0;
+  background: #142236;
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  border-bottom-left-radius: 5px;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-bubble {
+    animation: none;
+  }
+}
