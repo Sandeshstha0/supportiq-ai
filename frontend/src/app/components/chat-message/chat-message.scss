@@ -5,6 +5,8 @@
 }
 
 .message-bubble {
+  width: fit-content;
+  max-width: 100%;
   overflow-wrap: anywhere;
   animation: messageAppear 0.25s ease-out;
 }

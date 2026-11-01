@@ -14,7 +14,7 @@ import { ChatMessage } from './components/chat-message/chat-message';
     ChatHeader,
     WelcomeScreen,
     ChatInput,
-    ChatMessage
+    // ChatMessage
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
