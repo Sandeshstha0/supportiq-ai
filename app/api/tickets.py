@@ -11,6 +11,14 @@ from app.services.ticket_service import (
 )
 from app.services.guest_session_service import get_guest_session
 from app.services.email_service import send_ticket_confirmation_email
+from app.schemas.ticket import TicketDecisionUpdate
+from app.api.dependencies import get_current_user
+from app.services.ticket_service import (
+    get_all_tickets,
+    update_ticket_decision,
+)
+from app.services.email_service import send_ticket_decision_email
+from app.models.staff import StaffUserDB
 
 router = APIRouter(
     prefix="/api/v1/tickets",
@@ -113,3 +121,45 @@ def retrieve_ticket(
         )
 
     return ticket
+
+@router.get("/staff/all")
+def retrieve_all_tickets(
+    db: Session = Depends(get_db),
+    current_user: StaffUserDB = Depends(get_current_user),
+):
+    return get_all_tickets(db)
+
+@router.patch("/{ticket_id}/decision")
+def submit_ticket_decision(
+    ticket_id: int,
+    request: TicketDecisionUpdate,
+    db: Session = Depends(get_db),
+    current_user: StaffUserDB = Depends(get_current_user),
+):
+    ticket = update_ticket_decision(
+        db=db,
+        ticket_id=ticket_id,
+        decision=request.decision,
+        new_status=request.status,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Support ticket not found.",
+        )
+
+    # Notify the customer when an email address is available.
+    if ticket.customer_email:
+        send_ticket_decision_email(
+            recipient=ticket.customer_email,
+            customer_name=ticket.customer_name,
+            ticket_id=ticket.id,
+            subject=ticket.subject,
+            decision=ticket.decision,
+        )
+
+    return {
+        "message": "Ticket decision updated successfully.",
+        "ticket": ticket,
+    }

@@ -9,7 +9,9 @@ from app.services.auth_service import (
     create_access_token,
 )
 from app.api.dependencies import get_current_user
-
+from app.schemas.auth import StaffCreate
+from app.services.auth_service import hash_password
+from app.api.dependencies import require_admin
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -62,4 +64,51 @@ def get_my_profile(
         "email": current_user.email,
         "role": current_user.role,
         "is_active": current_user.is_active,
+    }
+
+@router.post(
+    "/staff",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_staff(
+    request: StaffCreate,
+    db: Session = Depends(get_db),
+    current_admin: StaffUserDB = Depends(require_admin),
+):
+    existing_user = (
+        db.query(StaffUserDB)
+        .filter(
+            (StaffUserDB.username == request.username)
+            | (StaffUserDB.email == request.email)
+        )
+        .first()
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or email is already registered.",
+        )
+
+    staff = StaffUserDB(
+        username=request.username,
+        email=str(request.email),
+        password_hash=hash_password(request.password),
+        role="staff",
+        is_active=True,
+    )
+
+    db.add(staff)
+    db.commit()
+    db.refresh(staff)
+
+    return {
+        "message": "Staff account created successfully.",
+        "staff": {
+            "id": staff.id,
+            "username": staff.username,
+            "email": staff.email,
+            "role": staff.role,
+            "is_active": staff.is_active,
+        },
     }

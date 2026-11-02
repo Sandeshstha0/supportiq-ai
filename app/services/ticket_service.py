@@ -1,7 +1,14 @@
-
 from sqlalchemy.orm import Session
 
 from app.models.ticket import SupportTicketDB
+
+
+VALID_TICKET_STATUSES = {
+    "open",
+    "in_progress",
+    "resolved",
+    "closed",
+}
 
 
 def create_ticket(
@@ -54,3 +61,41 @@ def get_tickets_by_guest_session(
         .order_by(SupportTicketDB.created_at.desc())
         .all()
     )
+
+
+# STAFF MANAGEMENT FUNCTIONS
+
+
+def get_all_tickets(
+    db: Session,
+) -> list[SupportTicketDB]:
+
+    return (
+        db.query(SupportTicketDB)
+        .order_by(SupportTicketDB.created_at.desc())
+        .all()
+    )
+
+
+def update_ticket_decision(
+    db: Session,
+    ticket_id: int,
+    decision: str,
+    new_status: str,
+) -> SupportTicketDB | None:
+
+    if new_status not in VALID_TICKET_STATUSES:
+        raise ValueError("Invalid ticket status.")
+
+    ticket = db.get(SupportTicketDB, ticket_id)
+
+    if ticket is None:
+        return None
+
+    ticket.decision = decision
+    ticket.status = new_status
+
+    db.commit()
+    db.refresh(ticket)
+
+    return ticket

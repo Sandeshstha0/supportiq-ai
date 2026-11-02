@@ -2,7 +2,21 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from typing import Literal
 
+
+class TicketDecisionUpdate(BaseModel):
+    decision: str = Field(
+        min_length=5,
+        max_length=3000,
+    )
+
+    status: Literal[
+        "open",
+        "in_progress",
+        "resolved",
+        "closed",
+    ]
 
 class TicketCreate(BaseModel):
     category: str = Field(min_length=2, max_length=50)

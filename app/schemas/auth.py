@@ -1,3 +1,4 @@
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -6,7 +7,7 @@ class StaffCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    role: str = "staff"
+    role: Literal["staff"] = "staff"
 
 
 class StaffLogin(BaseModel):
