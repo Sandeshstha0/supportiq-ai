@@ -4,12 +4,12 @@
   [class.w-72]="!collapsed()"
   class="sidebar-container flex h-screen shrink-0 flex-col border-r border-slate-800 bg-[#0b1120] text-slate-100 transition-all duration-300 ease-in-out"
 >
-
   <!-- Brand and Toggle -->
-  <div class="flex h-[88px] items-center border-b border-slate-800 px-4"
-       [class.justify-center]="collapsed()"
-       [class.justify-between]="!collapsed()">
-
+  <div
+    class="flex h-[88px] items-center border-b border-slate-800 px-4"
+    [class.justify-center]="collapsed()"
+    [class.justify-between]="!collapsed()"
+  >
     @if (!collapsed()) {
       <div class="flex items-center gap-3">
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20">
@@ -22,29 +22,24 @@
         </div>
       </div>
     } @else {
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 font-bold text-2xl">
+      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-2xl font-bold">
         S
       </div>
     }
 
     <button
       (click)="toggleSidebar()"
-      class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+      class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white"
       [title]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
     >
-      @if (collapsed()) {
-        <span>»</span>
-      } @else {
-        <span>«</span>
-      }
+      {{ collapsed() ? '»' : '«' }}
     </button>
-
   </div>
 
   <!-- New Conversation -->
   <div class="p-4">
-
     <button
+      (click)="startNewChat()"
       class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-500"
       title="New Conversation"
     >
@@ -54,12 +49,10 @@
         <span>New Conversation</span>
       }
     </button>
-
   </div>
 
   <!-- Navigation -->
   <div class="px-3 py-3">
-
     @if (!collapsed()) {
       <p class="mb-4 px-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
         Workspace
@@ -67,7 +60,6 @@
     }
 
     <nav class="space-y-2">
-
       <button
         title="AI Assistant"
         [class.justify-center]="collapsed()"
@@ -100,38 +92,71 @@
           <span>Support Tickets</span>
         }
       </button>
-
     </nav>
-
   </div>
 
   <!-- Recent Conversations -->
   @if (!collapsed()) {
     <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-5">
-
       <div class="mb-4 flex items-center justify-between px-2">
         <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">
           Recent Conversations
         </p>
-        <span class="text-xs text-slate-500">03</span>
+
+        <span class="text-xs text-slate-500">
+          {{ conversations().length.toString().padStart(2, '0') }}
+        </span>
       </div>
 
       <div class="space-y-1">
+        @for (conversation of conversations(); track conversation.conversation_id) {
+          <div
+            class="group flex items-center gap-1 rounded-lg transition"
+            [class.bg-blue-500/10]="activeConversationId() === conversation.conversation_id"
+            [class.hover:bg-slate-800]="true"
+          >
+            <button
+              (click)="openConversation(conversation.conversation_id)"
+              [class.text-blue-400]="activeConversationId() === conversation.conversation_id"
+              [class.text-slate-400]="activeConversationId() !== conversation.conversation_id"
+              class="min-w-0 flex-1 truncate rounded-lg px-3 py-3 text-left text-sm transition hover:text-white"
+              [title]="conversation.title"
+            >
+              <span class="mr-2">◷</span>
+              {{ conversation.title || 'New Conversation' }}
+            </button>
 
-        <button class="w-full truncate rounded-lg px-3 py-3 text-left text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white">
-          Product availability
-        </button>
-
-        <button class="w-full truncate rounded-lg px-3 py-3 text-left text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white">
-          Delivery information
-        </button>
-
-        <button class="w-full truncate rounded-lg px-3 py-3 text-left text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white">
-          Return policy inquiry
-        </button>
-
+            <button
+              (click)="requestDelete(conversation.conversation_id, $event)"
+              [attr.aria-label]="'Delete ' + conversation.title"
+              title="Delete conversation"
+              class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 opacity-0 transition hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100 focus:opacity-100"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="m19 6-1 14H6L5 6" />
+                <path d="M10 11v5" />
+                <path d="M14 11v5" />
+              </svg>
+            </button>
+          </div>
+        } @empty {
+          <p class="px-3 py-4 text-xs leading-relaxed text-slate-500">
+            No conversations yet. Start a new chat to see your history here.
+          </p>
+        }
       </div>
-
     </div>
   } @else {
     <div class="flex-1"></div>
@@ -139,12 +164,10 @@
 
   <!-- Customer Profile -->
   <div class="border-t border-slate-800 p-3">
-
     <div
       class="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-800"
       [class.justify-center]="collapsed()"
     >
-
       <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
         G
       </div>
@@ -161,9 +184,6 @@
 
         <span class="text-slate-500">⋯</span>
       }
-
     </div>
-
   </div>
-
 </aside>

@@ -1,5 +1,5 @@
 
-<div class="relative shrink-0 border-t border-sky-400/10 bg-[#0B1424] px-4 pb-5 pt-4 md:px-8">
+<div class="relative shrink-0 border-t border-sky-400/10 bg-transparent px-4 pb-5 pt-4 md:px-8">
   <div class="mx-auto max-w-4xl">
 
     <div
@@ -28,15 +28,21 @@
             {{ message().length }}/2000
           </span>
 
-          <button
-            type="button"
-            (click)="sendMessage()"
-            [disabled]="!message().trim() || isLoading()"
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-500 text-xl font-bold text-[#081321] transition hover:scale-105 disabled:opacity-30"
-            title="Send message"
-          >
-            ↑
-          </button>
+          
+<button
+  type="button"
+  (click)="sendMessage()"
+  [disabled]="!message().trim() || loading()"
+  class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-500 text-[#081321] shadow-lg shadow-sky-500/20 transition duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100"
+  [title]="loading() ? 'AI is responding...' : 'Send message'"
+>
+  @if (loading()) {
+    <span class="h-5 w-5 animate-spin rounded-full border-2 border-[#081321]/30 border-t-[#081321]"></span>
+  } @else {
+    <span class="text-xl font-bold">↑</span>
+  }
+</button>
+
         </div>
       </div>
     </div>

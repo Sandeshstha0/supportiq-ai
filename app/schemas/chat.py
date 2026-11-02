@@ -15,6 +15,13 @@ class ChatRequest(BaseModel):
         description="Existing conversation ID; omit to start a new conversation",
     )
 
+    session_token: str | None = Field(
+        default=None,
+        min_length=20,
+        max_length=200,
+        description="Anonymous browser session token",
+    )
+
 
 class ChatResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

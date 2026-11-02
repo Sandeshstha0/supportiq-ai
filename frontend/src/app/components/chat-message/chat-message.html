@@ -42,9 +42,11 @@
       [class.user-bubble]="isUser"
       [class.assistant-bubble]="!isUser"
     >
-      <p class="whitespace-pre-wrap break-words">
-        {{ content }}
-      </p>
+     @if (isUser) {
+  <p class="whitespace-pre-wrap break-words">{{ content }}</p>
+} @else {
+  <markdown [data]="content"></markdown>
+}
     </div>
   </div>
 </div>

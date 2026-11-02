@@ -55,3 +55,108 @@ body {
 .main-chat-scroll::-webkit-scrollbar-thumb:hover {
   background: #38bdf8;
 }
+
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  animation: typing 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+}
+
+
+
+/* SupportIQ AI Markdown Styling */
+
+markdown {
+  display: block;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+markdown h1,
+markdown h2,
+markdown h3 {
+  color: #e2e8f0;
+  font-weight: 700;
+  margin: 18px 0 10px;
+}
+
+markdown h1 { font-size: 1.4rem; }
+markdown h2 { font-size: 1.2rem; }
+markdown h3 { font-size: 1.05rem; }
+
+markdown p {
+  margin: 8px 0;
+}
+
+markdown ul,
+markdown ol {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+markdown ul { list-style-type: disc; }
+markdown ol { list-style-type: decimal; }
+
+markdown li {
+  margin: 5px 0;
+}
+
+markdown strong {
+  color: #7dd3fc;
+  font-weight: 700;
+}
+
+markdown a {
+  color: #38bdf8;
+  text-decoration: underline;
+}
+
+markdown pre {
+  overflow-x: auto;
+  padding: 14px;
+  margin: 12px 0;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #080f1d;
+}
+
+markdown code {
+  color: #7dd3fc;
+  font-size: 0.9em;
+}
+
+markdown blockquote {
+  border-left: 3px solid #38bdf8;
+  padding-left: 12px;
+  margin: 12px 0;
+  color: #94a3b8;
+}
+
+markdown hr {
+  border-color: #334155;
+  margin: 16px 0;
+}
+

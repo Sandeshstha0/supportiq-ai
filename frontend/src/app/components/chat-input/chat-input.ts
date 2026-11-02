@@ -1,5 +1,5 @@
 
-import { Component, output, signal } from '@angular/core';
+import { Component, output, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -15,7 +15,8 @@ export class ChatInput {
 
   messageSent = output<string>();
 
-  isLoading = signal(false);
+  // Loading state received from parent
+  loading = input(false);
 
   // Input expansion state
   isExpanded = signal(false);
@@ -33,7 +34,7 @@ export class ChatInput {
   sendMessage(): void {
     const text = this.message().trim();
 
-    if (!text || this.isLoading()) {
+    if (!text || this.loading()) {
       return;
     }
 
@@ -48,5 +49,4 @@ export class ChatInput {
       this.sendMessage();
     }
   }
-
 }

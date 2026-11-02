@@ -1,18 +1,77 @@
 
 <div class="flex h-dvh w-full overflow-hidden bg-[#080F1D] text-white">
 
-  <app-sidebar class="h-full shrink-0" />
-
+  <!-- Sidebar -->
+<app-sidebar
+  class="h-full shrink-0"
+  [conversations]="conversations()"
+  [activeConversationId]="conversationId()"
+  (newChatClicked)="newChat()"
+  (conversationSelected)="openConversation($event)"
+  (conversationDeleteRequested)="confirmDeleteConversation($event)"
+/>  
+<!-- Main Chat Area -->
   <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
+    <!-- Header -->
     <app-chat-header />
 
-    <section class="main-chat-scroll min-h-0 flex-1 overflow-y-auto">
-      <app-welcome-screen />
+    <!-- Messages Area -->
+   <section
+  #chatScroll
+  class="main-chat-scroll min-h-0 flex-1 overflow-y-auto"
+>
+
+      <div class="mx-auto w-full max-w-5xl px-4 py-6 md:px-8">
+
+        <!-- Welcome Screen -->
+        @if (messages().length === 0) {
+          <app-welcome-screen
+            (promptSelected)="sendMessage($event)"
+          />
+        }
+
+        <!-- Conversation Messages -->
+        @else {
+          @for (msg of messages(); track $index) {
+            <app-chat-message
+              [role]="msg.role"
+              [content]="msg.content"
+              [timestamp]="msg.timestamp"
+            />
+          }
+
+          <!-- AI Typing Indicator -->
+          @if (isLoading()) {
+            <div class="flex items-center gap-3 py-5">
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-600 text-sm font-bold text-[#081321]">
+                S
+              </div>
+
+              <div class="flex items-center gap-1 rounded-2xl border border-slate-700/70 bg-[#111E30] px-5 py-4">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+          }
+
+          <!-- Error Message -->
+          @if (errorMessage()) {
+            <div class="my-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {{ errorMessage() }}
+            </div>
+          }
+        }
+
+      </div>
     </section>
 
-    <app-chat-input />
+    <!-- Chat Input -->
+    <app-chat-input
+  [loading]="isLoading()"
+  (messageSent)="sendMessage($event)"
+/>
 
   </main>
-
 </div>
