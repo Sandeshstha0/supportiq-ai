@@ -21,6 +21,7 @@ from app.api.auth import router as auth_router
 from app.models.conversation import ConversationDB
 from app.models.staff import StaffUserDB
 from app.api import guest
+from app.api.dashboard import router as dashboard_router
 
 
 
@@ -78,3 +79,4 @@ app.include_router(
 
 app.include_router(guest.router)
 app.include_router(auth_router)
+app.include_router(dashboard_router)

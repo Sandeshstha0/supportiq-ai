@@ -16,6 +16,8 @@ from app.api.dependencies import get_current_user
 from app.services.ticket_service import (
     get_all_tickets,
     update_ticket_decision,
+    get_staff_ticket_by_id,
+
 )
 from app.services.email_service import send_ticket_decision_email
 from app.models.staff import StaffUserDB
@@ -124,10 +126,58 @@ def retrieve_ticket(
 
 @router.get("/staff/all")
 def retrieve_all_tickets(
+    status_filter: str | None = None,
+    category: str | None = None,
+    search: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
     db: Session = Depends(get_db),
     current_user: StaffUserDB = Depends(get_current_user),
 ):
-    return get_all_tickets(db)
+    if status_filter and status_filter not in {
+        "open",
+        "in_progress",
+        "resolved",
+        "closed",
+    }:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid ticket status.",
+        )
+
+    if page < 1 or page_size < 1 or page_size > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Page must be at least 1 and page size must be between 1 and 100.",
+        )
+
+    return get_all_tickets(
+        db=db,
+        status=status_filter,
+        category=category,
+        search=search,
+        page=page,
+        page_size=page_size,
+    )
+
+@router.get("/staff/{ticket_id}")
+def retrieve_staff_ticket(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: StaffUserDB = Depends(get_current_user),
+):
+    ticket = get_staff_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Support ticket not found.",
+        )
+
+    return ticket
 
 @router.patch("/{ticket_id}/decision")
 def submit_ticket_decision(

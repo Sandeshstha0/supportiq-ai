@@ -112,3 +112,70 @@ def create_staff(
             "is_active": staff.is_active,
         },
     }
+
+@router.get("/staff")
+def get_all_staff(
+    db: Session = Depends(get_db),
+    current_admin: StaffUserDB = Depends(require_admin),
+):
+    staff_members = (
+        db.query(StaffUserDB)
+        .order_by(StaffUserDB.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": staff.id,
+            "username": staff.username,
+            "email": staff.email,
+            "role": staff.role,
+            "is_active": staff.is_active,
+            "created_at": staff.created_at,
+        }
+        for staff in staff_members
+    ]
+
+@router.patch("/staff/{staff_id}/status")
+def update_staff_status(
+    staff_id: int,
+    is_active: bool,
+    db: Session = Depends(get_db),
+    current_admin: StaffUserDB = Depends(require_admin),
+):
+    staff = db.query(StaffUserDB).filter(
+        StaffUserDB.id == staff_id
+    ).first()
+
+    if staff is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Staff account not found.",
+        )
+
+    # Prevent an admin from deactivating their own account
+    if staff.id == current_admin.id and not is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot deactivate your own account.",
+        )
+
+    staff.is_active = is_active
+
+    db.commit()
+    db.refresh(staff)
+
+    return {
+        "message": (
+            "Staff account activated successfully."
+            if is_active
+            else "Staff account deactivated successfully."
+        ),
+        "staff": {
+            "id": staff.id,
+            "username": staff.username,
+            "email": staff.email,
+            "role": staff.role,
+            "is_active": staff.is_active,
+        },
+    }
