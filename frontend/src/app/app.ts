@@ -1,4 +1,3 @@
-
 import {
   Component,
   signal,
@@ -6,8 +5,11 @@ import {
   AfterViewChecked,
   ElementRef,
   ViewChild,
-  OnInit
+  OnInit,
+  PLATFORM_ID
 } from '@angular/core';
+
+import { isPlatformBrowser } from '@angular/common';
 
 import { Sidebar } from './components/sidebar/sidebar';
 import { ChatHeader } from './components/chat-header/chat-header';
@@ -38,6 +40,7 @@ interface ChatMessageData {
 })
 export class App implements OnInit, AfterViewChecked {
   private chatService = inject(ChatService);
+  private platformId = inject(PLATFORM_ID);
 
   @ViewChild('chatScroll')
   private chatScroll!: ElementRef<HTMLElement>;
@@ -62,34 +65,39 @@ export class App implements OnInit, AfterViewChecked {
   }
 
   // Create a guest session or restore the existing one.
-  private initializeGuestSession(): void {
-    const savedToken = localStorage.getItem(this.storageKey);
-
-    this.chatService.createOrGetGuestSession(
-      savedToken || undefined
-    ).subscribe({
-      next: (response) => {
-        localStorage.setItem(
-          this.storageKey,
-          response.session_token
-        );
-
-        this.guestSessionToken.set(response.session_token);
-        this.isInitializingSession.set(false);
-
-        this.loadConversations();
-      },
-      error: (error) => {
-        console.error('Guest session initialization failed:', error);
-
-        this.errorMessage.set(
-          'Could not initialize your support session. Please refresh and try again.'
-        );
-
-        this.isInitializingSession.set(false);
-      }
-    });
+ private initializeGuestSession(): void {
+  // Prevent localStorage access during server-side rendering.
+  if (!isPlatformBrowser(this.platformId)) {
+    return;
   }
+
+  const savedToken = localStorage.getItem(this.storageKey);
+
+  this.chatService.createOrGetGuestSession(
+    savedToken || undefined
+  ).subscribe({
+    next: (response) => {
+      localStorage.setItem(
+        this.storageKey,
+        response.session_token
+      );
+
+      this.guestSessionToken.set(response.session_token);
+      this.isInitializingSession.set(false);
+
+      this.loadConversations();
+    },
+    error: (error) => {
+      console.error('Guest session initialization failed:', error);
+
+      this.errorMessage.set(
+        'Could not initialize your support session. Please refresh and try again.'
+      );
+
+      this.isInitializingSession.set(false);
+    }
+  });
+}
 
   ngAfterViewChecked(): void {
     const currentCount = this.messages().length;

@@ -9,7 +9,9 @@ from app.db.database import SessionLocal
 from app.services.product_tool import search_products
 from app.services.ticket_service import create_ticket
 from app.services.knowledge_search_service import search_knowledge
-
+from app.services.email_service import send_ticket_confirmation_email
+from app.models.conversation import GuestSessionDB
+from app.services.order_service import create_order
 load_dotenv()
 
 # Configure logging
@@ -26,10 +28,36 @@ if not api_key:
 client = genai.Client(api_key=api_key)
 
 
-def generate_response(message: str,history: list[dict[str, str]] | None = None) -> str:
+
+def generate_response(
+    message: str,
+    history: list[dict[str, str]] | None = None,
+    guest_session_id: int | None = None,
+) -> str:
+
     start_time = time.perf_counter()
 
+    # Secure wrapper: Gemini does not provide the guest session ID.
+    def create_customer_order_tool(
+        customer_name: str,
+        customer_phone: str,
+        delivery_location: str,
+        ward_number: int,
+        items: list[dict],
+        customer_email: str | None = None,
+    ) -> dict:
+        return create_customer_order(
+            guest_session_id=guest_session_id,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            delivery_location=delivery_location,
+            ward_number=ward_number,
+            items=items,
+            customer_email=customer_email,
+        )
+
     config = types.GenerateContentConfig(
+
         system_instruction="""
 You are SupportIQ AI, the official customer support assistant
 for Lasata Department Stores.
@@ -72,22 +100,28 @@ PRODUCT SEARCH RULES:
 
   SUPPORT TICKET RULES:
 
-- If a customer explicitly asks to report a problem or complaint,
-  create a support ticket when sufficient information is available.
-- A clear problem description is sufficient to create a ticket.
-- Do not require an order number, customer name, or email unless
-  the application explicitly requires it.
+SUPPORT TICKET RULES:
+
+- If a customer explicitly asks to report a problem or complaint, help them create a support ticket.
+- A clear problem description is sufficient to identify the issue, but collect the following customer details BEFORE creating the ticket:
+  1. Customer name
+  2. Customer email
+  3. Customer phone number
+- If any required customer details are missing, politely ask the customer for them.
+- Never create a ticket before collecting all three customer details.
 - Generate a short, descriptive subject from the customer's message.
 - Use an appropriate category, such as:
   damaged_product, delivery, missing_item, wrong_item, or general.
-- If the customer describes a clear problem but does not explicitly
-  ask to report it, offer to create a ticket or ask whether they
-  would like to proceed.
-- Do not ask for information that is not required to create the ticket.
-- Call create_support_ticket to save the ticket.
+- If the customer describes a clear problem but does not explicitly ask to report it, offer to create a ticket or ask whether they would like to proceed.
+- Do not call create_support_ticket until all required customer details are available.
+- Once all details are collected, create exactly ONE ticket for the complaint.
+- Do not create duplicate tickets for the same complaint in the same conversation.
+- Pass the following information to create_support_ticket:
+  category, subject, description, customer_name, customer_email, and customer_phone.
 - Only confirm ticket creation if the tool returns success=true.
 - Report the real ticket ID returned by the tool.
 - If ticket creation fails, explain the failure honestly.
+- After successful creation, thank the customer and explain that the support team will review the issue and contact them if necessary.
 
 
 KNOWLEDGE BASE RULES:
@@ -116,8 +150,57 @@ KNOWLEDGE BASE RULES:
 8. Continue using create_support_ticket when a customer requests
    a support ticket and the required information is available.
 
+
+CUSTOMER ORDERING RULES:
+
+1. When a customer wants to purchase products, help them build an order.
+
+2. Use search_store_products to verify product names, prices,
+   units, and stock availability.
+
+3. Collect the following details before submitting an order:
+   - Customer name
+   - Phone number
+   - Delivery location/address
+   - Ward number
+   - Email (optional)
+
+4. Home delivery is available only in Byas/Damauli wards 2, 3 and 4.
+
+5. If the customer is outside these eligible wards, do not submit
+   a home-delivery order. Explain the restriction and offer to
+   connect them with the Lasata team for assistance.
+
+6. Before submitting an order:
+   - Display all selected products and quantities.
+   - Show the product prices and calculated total.
+   - Show the customer's delivery details.
+   - Ask the customer to explicitly confirm the order.
+
+7. NEVER call create_customer_order_tool before the customer
+   explicitly confirms the complete order summary.
+
+8. Call create_customer_order_tool exactly once after confirmation.
+   Do not create duplicate orders for the same request.
+
+9. Pass product IDs and quantities to the tool.
+   Never pass AI-calculated prices or totals.
+
+10. Only say the order request was submitted if the tool returns
+    success=true.
+
+11. After successful submission:
+    - Provide the actual order ID.
+    - Explain that the order is pending confirmation.
+    - Tell the customer that the Lasata team will contact them shortly.
+    - Never claim that the order is confirmed or processing.
+
+12. If order submission fails, explain the failure honestly.
+    Never pretend an order was created.
+
+
 """,
-        tools=[search_store_products, create_support_ticket, search_store_knowledge],
+        tools=[search_store_products, create_support_ticket, search_store_knowledge,create_customer_order_tool],
         max_output_tokens=300,
         temperature=0.2,
     )
@@ -179,11 +262,26 @@ KNOWLEDGE BASE RULES:
                 )
 
             elif function_call.name == "create_support_ticket":
-                result = create_support_ticket(
-                    category=args.get("category", "general"),
-                    subject=args.get("subject", ""),
-                    description=args.get("description", ""),
-                )
+              result = create_support_ticket(
+                category=args.get("category", "general"),
+                subject=args.get("subject", ""),
+                description=args.get("description", ""),
+                guest_session_id=guest_session_id,
+                customer_name=args.get("customer_name"),
+                customer_email=args.get("customer_email"),
+                customer_phone=args.get("customer_phone"),
+
+            
+    )
+            elif function_call.name == "create_customer_order_tool":
+                 result = create_customer_order_tool(
+                   customer_name=args.get("customer_name"),
+                  customer_phone=args.get("customer_phone"),
+                    customer_email=args.get("customer_email"),
+                    delivery_location=args.get("delivery_location"),
+                     ward_number=args.get("ward_number"),
+                      items=args.get("items", []),
+    )
             elif function_call.name == "search_store_knowledge":
                  result = search_store_knowledge(
                      query=args.get("query", ""),
@@ -275,12 +373,86 @@ def search_store_knowledge(
     }
 
 
+def create_customer_order(
+    guest_session_id: int | None,
+    customer_name: str,
+    customer_phone: str,
+    delivery_location: str,
+    ward_number: int,
+    items: list[dict],
+    customer_email: str | None = None,
+) -> dict:
+    """Create a pending customer order request."""
+
+    if guest_session_id is None:
+        return {
+            "success": False,
+            "message": "Customer session is unavailable. Please try again.",
+        }
+
+    location = delivery_location.lower()
+
+    if not any(word in location for word in ["byas", "vyas", "damauli"]):
+        return {
+            "success": False,
+            "message": "Home delivery is available only in Byas/Damauli.",
+        }
+
+    if ward_number not in {2, 3, 4}:
+        return {
+            "success": False,
+            "message": "Home delivery is available only in wards 2, 3 and 4.",
+        }
+
+    db = SessionLocal()
+
+    try:
+        order = create_order(
+            db=db,
+            guest_session_id=guest_session_id,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            customer_email=customer_email,
+            delivery_location=delivery_location,
+            ward_number=ward_number,
+            items=items,
+        )
+
+        return {
+            "success": True,
+            "order_id": order.id,
+            "total_amount": str(order.total_amount),
+            "status": order.status,
+            "message": (
+                "Order request submitted successfully. "
+                "The Lasata team will contact the customer shortly."
+            ),
+        }
+
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to create customer order")
+
+        return {
+            "success": False,
+            "message": "Unable to submit the order. Please try again.",
+        }
+
+    finally:
+        db.close()
+
+
+
 def create_support_ticket(
     category: str,
     subject: str,
     description: str,
+    guest_session_id: int | None = None,
+    customer_name: str | None = None,
+    customer_email: str | None = None,
+    customer_phone: str | None = None,
 ) -> dict:
-    """Create a support ticket in the store database."""
+    """Create a support ticket linked to the current guest session."""
 
     db = SessionLocal()
 
@@ -290,7 +462,21 @@ def create_support_ticket(
             category=category,
             subject=subject,
             description=description,
+            guest_session_id=guest_session_id,
+            customer_name=customer_name,
+            customer_email=customer_email,
+            customer_phone=customer_phone,
         )
+
+        email_sent = False
+
+        if ticket.customer_email:
+            email_sent = send_ticket_confirmation_email(
+                recipient=ticket.customer_email,
+                customer_name=ticket.customer_name,
+                ticket_id=ticket.id,
+                subject=ticket.subject,
+            )
 
         return {
             "success": True,
@@ -298,6 +484,7 @@ def create_support_ticket(
             "category": ticket.category,
             "subject": ticket.subject,
             "status": ticket.status,
+            "email_sent": email_sent,
             "message": "Support ticket created successfully.",
         }
 
@@ -314,4 +501,4 @@ def create_support_ticket(
         }
 
     finally:
-        db.close()
+        db.close()        

@@ -109,6 +109,7 @@ def chat(
         reply = generate_response(
             message=request.message,
             history=history,
+            guest_session_id=guest_session.id,
         )
 
         save_message(
