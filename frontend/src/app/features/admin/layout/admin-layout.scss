@@ -1,0 +1,10 @@
+:host { display: block; height: 100%; }
+.admin-sidebar { width: 252px; }
+.admin-sidebar.sidebar-collapsed { width: 76px; }
+.nav-item.nav-active { color: #8bdcff; background: linear-gradient(90deg,#38bdf81a,#38bdf808); box-shadow: inset 2px 0 #51c9f6; }
+.nav-item.nav-active svg { color: #75d5fb; }
+@media (max-width: 767px) {
+  .admin-sidebar { width: min(290px, 84vw); transform: translateX(-102%); }
+  .admin-sidebar.sidebar-collapsed { width: min(290px, 84vw); }
+  .admin-sidebar.mobile-visible { transform: translateX(0); }
+}

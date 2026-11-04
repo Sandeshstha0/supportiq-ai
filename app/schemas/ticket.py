@@ -1,8 +1,8 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import Literal
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class TicketDecisionUpdate(BaseModel):
@@ -17,6 +17,14 @@ class TicketDecisionUpdate(BaseModel):
         "resolved",
         "closed",
     ]
+
+    @field_validator("decision")
+    @classmethod
+    def decision_must_contain_text(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 5:
+            raise ValueError("Decision/update must contain at least 5 characters.")
+        return value
 
 class TicketCreate(BaseModel):
     category: str = Field(min_length=2, max_length=50)
@@ -59,3 +67,16 @@ class TicketResponse(BaseModel):
     customer_email: str | None
     customer_phone: str | None
     created_at: datetime
+
+
+class TicketStaffResponse(TicketResponse):
+    decision: str | None
+    updated_at: datetime | None
+
+
+class TicketListResponse(BaseModel):
+    items: list[TicketStaffResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

@@ -24,3 +24,12 @@ export const guestOnlyGuard: CanActivateFn = () => {
     : true,
   ));
 };
+
+export const adminRoleGuard: CanActivateFn = () => {
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) return true;
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.restoreSession().pipe(map(user =>
+    user?.role === 'admin' ? true : router.createUrlTree(['/admin']),
+  ));
+};

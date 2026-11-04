@@ -1,0 +1,9 @@
+:host { display: block; }
+.stat-card { box-shadow: inset 0 1px #ffffff06; transition: border-color .2s, transform .2s; }
+.stat-card:hover { transform: translateY(-2px); border-color: #7dd3fc24; }
+.stat-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; font-size: 18px; }
+.tone-sky { color: #77d7fb; background: #38bdf813; border: 1px solid #38bdf81e; }
+.tone-yellow { color: #f4cc67; background: #f4c85a12; border: 1px solid #f4c85a1e; }
+.tone-blue { color: #81aaff; background: #6491ff12; border: 1px solid #6491ff1e; }
+.tone-green { color: #65ddb2; background: #42d6a212; border: 1px solid #42d6a21e; }
+.empty-panel { display: flex; min-height: 205px; flex-direction: column; align-items: center; justify-content: center; text-align: center; }

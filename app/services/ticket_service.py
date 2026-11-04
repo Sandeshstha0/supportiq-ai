@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.ticket import SupportTicketDB
-from sqlalchemy import or_
+from sqlalchemy import String, cast, or_
 
 
 VALID_TICKET_STATUSES = {
@@ -10,6 +10,17 @@ VALID_TICKET_STATUSES = {
     "resolved",
     "closed",
 }
+
+TICKET_STATUS_TRANSITIONS = {
+    "open": {"in_progress", "resolved", "closed"},
+    "in_progress": {"open", "resolved", "closed"},
+    "resolved": {"in_progress", "closed"},
+    "closed": {"open", "in_progress"},
+}
+
+
+class TicketStatusTransitionError(ValueError):
+    pass
 
 
 def create_ticket(
@@ -93,15 +104,19 @@ def get_all_tickets(
     # Search across customer and ticket details
     if search:
         search_term = f"%{search.strip()}%"
+        numeric_id = int(search.strip()) if search.strip().isdigit() else None
 
-        query = query.filter(
-            or_(
+        search_filter = or_(
                 SupportTicketDB.subject.ilike(search_term),
                 SupportTicketDB.customer_name.ilike(search_term),
                 SupportTicketDB.customer_email.ilike(search_term),
+                SupportTicketDB.customer_phone.ilike(search_term),
                 SupportTicketDB.description.ilike(search_term),
+                cast(SupportTicketDB.id, String).ilike(search_term),
             )
-        )
+        if numeric_id is not None:
+            search_filter = or_(search_filter, SupportTicketDB.id == numeric_id)
+        query = query.filter(search_filter)
 
     # Count matching tickets before pagination
     total = query.count()
@@ -141,15 +156,32 @@ def update_ticket_decision(
     ticket_id: int,
     decision: str,
     new_status: str,
-) -> SupportTicketDB | None:
+) -> tuple[SupportTicketDB | None, bool]:
 
     if new_status not in VALID_TICKET_STATUSES:
-        raise ValueError("Invalid ticket status.")
+        raise TicketStatusTransitionError("Invalid ticket status.")
 
-    ticket = db.get(SupportTicketDB, ticket_id)
+    ticket = (
+        db.query(SupportTicketDB)
+        .filter(SupportTicketDB.id == ticket_id)
+        .with_for_update()
+        .first()
+    )
 
     if ticket is None:
-        return None
+        return None, False
+
+    if (
+        new_status != ticket.status
+        and new_status not in TICKET_STATUS_TRANSITIONS.get(ticket.status, set())
+    ):
+        raise TicketStatusTransitionError(
+            f"Ticket cannot transition from {ticket.status} to {new_status}."
+        )
+
+    changed = ticket.decision != decision or ticket.status != new_status
+    if not changed:
+        return ticket, False
 
     ticket.decision = decision
     ticket.status = new_status
@@ -157,4 +189,4 @@ def update_ticket_decision(
     db.commit()
     db.refresh(ticket)
 
-    return ticket
+    return ticket, True

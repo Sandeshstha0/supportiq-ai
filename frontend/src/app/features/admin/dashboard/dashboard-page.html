@@ -1,0 +1,52 @@
+<div class="mx-auto w-full max-w-[1500px] p-4 sm:p-6 lg:p-8">
+  <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div><p class="mb-2 text-[11px] font-semibold uppercase tracking-[.18em] text-sky-300">Support overview</p><h2 class="text-2xl font-semibold tracking-tight text-white sm:text-[28px]">Good to see you</h2><p class="mt-2 text-sm text-slate-500">Here’s the latest activity across customer support.</p></div>
+    <button (click)="load()" class="inline-flex h-10 items-center justify-center gap-2 self-start rounded-xl border border-white/[0.09] bg-white/[0.025] px-4 text-xs font-medium text-slate-300 transition hover:border-sky-300/25 hover:text-sky-200 sm:self-auto"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.4-3"/></svg>Refresh data</button>
+  </div>
+
+  @if (statsError()) { <div role="alert" class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-300/15 bg-rose-300/[0.06] px-4 py-3 text-sm text-rose-200"><span>Ticket statistics could not be loaded. Values are unavailable.</span><button class="text-xs font-semibold underline underline-offset-4" (click)="load()">Retry</button></div> }
+
+  <section aria-label="Ticket statistics" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    @for (card of [
+      {label: 'Total tickets', key: 'total_tickets', hint: 'All support requests', icon: '◫', tone: 'sky'},
+      {label: 'Open tickets', key: 'open_tickets', hint: 'Awaiting attention', icon: '◷', tone: 'yellow'},
+      {label: 'In progress', key: 'in_progress_tickets', hint: 'Being handled', icon: '↗', tone: 'blue'},
+      {label: 'Resolved', key: 'resolved_tickets', hint: 'Successfully resolved', icon: '✓', tone: 'green'},
+      {label: 'Closed', key: 'closed_tickets', hint: 'Closed requests', icon: '−', tone: 'blue'}
+    ]; track card.key) {
+      <article class="stat-card rounded-2xl border border-white/[0.075] bg-[#101b2a] p-5">
+        <div class="flex items-start justify-between"><div><p class="text-xs font-medium text-slate-400">{{ card.label }}</p><div class="mt-3 text-[30px] font-semibold tracking-tight text-white">@if (statsLoading()) { <span class="inline-block h-8 w-16 animate-pulse rounded-md bg-white/[0.07]"></span> } @else if (stats(); as value) { {{ statValue(value, card.key) }} } @else { <span class="text-xl text-slate-600">Unavailable</span> }</div></div><span class="stat-icon" [class]="'stat-icon tone-' + card.tone">{{ card.icon }}</span></div>
+        <p class="mt-3 text-[11px] text-slate-600">{{ card.hint }}</p>
+      </article>
+    }
+  </section>
+
+  <div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+    <section class="rounded-2xl border border-white/[0.075] bg-[#101b2a] p-5 sm:p-6">
+      <div class="mb-5 flex items-center justify-between"><div><h3 class="text-sm font-semibold text-white">Recent tickets</h3><p class="mt-1 text-xs text-slate-500">Latest customer support requests</p></div><a routerLink="/admin/tickets" class="text-xs font-medium text-sky-300 transition hover:text-sky-200">View tickets <span aria-hidden="true">→</span></a></div>
+      @if (ticketsError()) { <div class="rounded-xl border border-rose-300/15 bg-rose-300/[0.05] p-4 text-sm text-rose-200">Recent tickets could not be loaded. <button class="ml-1 underline" (click)="load()">Retry</button></div> }
+      @else if (ticketsLoading()) { <div class="space-y-3">@for (row of [1,2,3,4]; track row) { <div class="h-[54px] animate-pulse rounded-xl bg-white/[0.035]"></div> }</div> }
+      @else if (recentTickets()?.length === 0) { <div class="empty-panel"><span class="text-2xl text-slate-600">◫</span><p class="mt-3 text-sm font-medium text-slate-300">No tickets yet</p><p class="mt-1 text-xs text-slate-500">New customer requests will appear here.</p></div> }
+      @else if (recentTickets(); as tickets) {
+        <div class="hidden overflow-x-auto md:block"><table class="w-full min-w-[610px] text-left"><thead><tr class="border-b border-white/[0.06] text-[10px] font-medium uppercase tracking-[.12em] text-slate-600"><th class="pb-3 pr-3">Ticket</th><th class="pb-3 px-3">Customer</th><th class="pb-3 px-3">Category</th><th class="pb-3 px-3">Status</th><th class="pb-3 pl-3 text-right">Created</th></tr></thead><tbody>@for (ticket of tickets; track ticket.id) { <tr class="border-b border-white/[0.045] last:border-0"><td class="py-4 pr-3"><p class="max-w-[230px] truncate text-xs font-medium text-slate-200">{{ ticket.subject }}</p><p class="mt-1 text-[10px] text-slate-600">#{{ ticket.id }}</p></td><td class="px-3 py-4 text-xs text-slate-400">{{ ticket.customer_name || 'Customer' }}</td><td class="px-3 py-4"><span class="rounded-md bg-white/[0.045] px-2 py-1 text-[10px] text-slate-400">{{ ticket.category }}</span></td><td class="px-3 py-4"><span class="rounded-full border px-2.5 py-1 text-[10px] capitalize" [class]="ticketStatusClass(ticket.status)">{{ statusLabel(ticket.status) }}</span></td><td class="py-4 pl-3 text-right text-[10px] text-slate-500">{{ formatDate(ticket.created_at) }}</td></tr> }</tbody></table></div>
+        <div class="space-y-3 md:hidden">@for (ticket of tickets; track ticket.id) { <article class="rounded-xl border border-white/[0.06] bg-[#0c1624] p-4"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><p class="truncate text-sm font-medium text-slate-200">{{ ticket.subject }}</p><p class="mt-1 text-[11px] text-slate-500">#{{ ticket.id }} · {{ ticket.customer_name || 'Customer' }}</p></div><span class="shrink-0 rounded-full border px-2 py-1 text-[10px] capitalize" [class]="ticketStatusClass(ticket.status)">{{ statusLabel(ticket.status) }}</span></div><div class="mt-3 flex justify-between text-[10px] text-slate-500"><span>{{ ticket.category }}</span><span>{{ formatDate(ticket.created_at) }}</span></div></article> }</div>
+      }
+    </section>
+
+    <section class="rounded-2xl border border-white/[0.075] bg-[#101b2a] p-5 sm:p-6">
+      <div class="mb-6"><h3 class="text-sm font-semibold text-white">Ticket categories</h3><p class="mt-1 text-xs text-slate-500">Requests grouped by category</p></div>
+      @if (categoriesError()) { <div class="empty-panel min-h-[230px]"><p class="text-sm text-rose-200">Category data unavailable</p><button class="mt-2 text-xs text-sky-300 underline" (click)="load()">Retry</button></div> }
+      @else if (categoriesLoading()) { <div class="space-y-5">@for (row of [1,2,3,4]; track row) { <div><div class="mb-2 h-3 w-28 animate-pulse rounded bg-white/[0.06]"></div><div class="h-2 animate-pulse rounded-full bg-white/[0.04]"></div></div> }</div> }
+      @else if (categoryStats()?.length === 0) { <div class="empty-panel min-h-[230px]"><span class="text-2xl text-slate-600">▥</span><p class="mt-3 text-sm font-medium text-slate-300">No category data</p><p class="mt-1 text-xs text-slate-500">Statistics appear after tickets are created.</p></div> }
+      @else if (categoryStats(); as categories) { <div class="space-y-5">@for (item of categories; track item.category) { <div><div class="mb-2 flex items-center justify-between gap-3"><span class="truncate text-xs capitalize text-slate-300">{{ item.category }}</span><span class="text-xs tabular-nums text-slate-500">{{ item.total }}</span></div><div class="h-1.5 overflow-hidden rounded-full bg-white/[0.055]"><div class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-300 transition-all duration-700" [style.width]="categoryWidth(item.total)"></div></div></div> }</div> }
+    </section>
+  </div>
+
+  <section class="mt-5 rounded-2xl border border-white/[0.075] bg-[#101b2a] p-5 sm:p-6">
+    <div class="mb-5"><h3 class="text-sm font-semibold text-white">Ticket status distribution</h3><p class="mt-1 text-xs text-slate-500">Current breakdown by workflow status</p></div>
+    @if (statusesError()) { <div class="rounded-xl border border-rose-300/15 bg-rose-300/[0.05] p-4 text-sm text-rose-200">Status data could not be loaded. <button class="ml-1 underline" (click)="load()">Retry</button></div> }
+    @else if (statusesLoading()) { <div class="h-20 animate-pulse rounded-xl bg-white/[0.035]"></div> }
+    @else if (statusStats()?.length === 0) { <div class="empty-panel min-h-36"><span class="text-2xl text-slate-600">◴</span><p class="mt-3 text-sm font-medium text-slate-300">No status data</p><p class="mt-1 text-xs text-slate-500">Statistics appear after tickets are created.</p></div> }
+    @else if (statusStats(); as statuses) { <div class="grid gap-5 md:grid-cols-[minmax(180px,0.65fr)_1fr] md:items-center"><div class="flex h-16 overflow-hidden rounded-xl border border-white/[0.06] bg-[#0b1422]" role="img" aria-label="Ticket status distribution chart">@for (item of statuses; track item.status) { <div class="h-full transition-all" [style.width.%]="item.percentage" [style.background]="statusColor(item.status)" [title]="statusLabel(item.status) + ': ' + item.percentage + '%'" [attr.aria-label]="statusLabel(item.status) + ' ' + item.percentage + '%'" ></div> }</div><div class="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-4">@for (item of statuses; track item.status) { <div class="flex items-start gap-2"><span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-sm" [style.background]="statusColor(item.status)"></span><div><p class="text-[11px] capitalize text-slate-300">{{ statusLabel(item.status) }}</p><p class="mt-1 text-xs text-slate-500">{{ item.total }} <span class="text-slate-600">· {{ item.percentage }}%</span></p></div></div> }</div></div> }
+  </section>
+</div>

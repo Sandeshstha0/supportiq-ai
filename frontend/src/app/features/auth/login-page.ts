@@ -38,9 +38,7 @@ export class LoginPage {
     const { username, password } = this.form.getRawValue();
     this.auth.login(username.trim(), password).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        const safeReturnUrl = returnUrl?.startsWith('/admin') ? returnUrl : '/admin';
-        void this.router.navigateByUrl(safeReturnUrl);
+        void this.router.navigateByUrl('/admin');
       },
       error: error => {
         if (error.status === 401) {

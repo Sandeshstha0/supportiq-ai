@@ -1,9 +1,9 @@
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.schemas.ticket import TicketCreate, TicketResponse
+from app.schemas.ticket import TicketCreate, TicketListResponse, TicketResponse, TicketStaffResponse
 from app.services.ticket_service import (
     create_ticket,
     get_ticket_by_id,
@@ -17,6 +17,8 @@ from app.services.ticket_service import (
     get_all_tickets,
     update_ticket_decision,
     get_staff_ticket_by_id,
+    VALID_TICKET_STATUSES,
+    TicketStatusTransitionError,
 
 )
 from app.services.email_service import send_ticket_decision_email
@@ -124,31 +126,20 @@ def retrieve_ticket(
 
     return ticket
 
-@router.get("/staff/all")
+@router.get("/staff/all", response_model=TicketListResponse)
 def retrieve_all_tickets(
-    status_filter: str | None = None,
-    category: str | None = None,
-    search: str | None = None,
-    page: int = 1,
-    page_size: int = 10,
+    status_filter: str | None = Query(default=None, max_length=30),
+    category: str | None = Query(default=None, max_length=50),
+    search: str | None = Query(default=None, max_length=100),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: StaffUserDB = Depends(get_current_user),
 ):
-    if status_filter and status_filter not in {
-        "open",
-        "in_progress",
-        "resolved",
-        "closed",
-    }:
+    if status_filter and status_filter not in VALID_TICKET_STATUSES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid ticket status.",
-        )
-
-    if page < 1 or page_size < 1 or page_size > 100:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Page must be at least 1 and page size must be between 1 and 100.",
         )
 
     return get_all_tickets(
@@ -160,7 +151,7 @@ def retrieve_all_tickets(
         page_size=page_size,
     )
 
-@router.get("/staff/{ticket_id}")
+@router.get("/staff/{ticket_id}", response_model=TicketStaffResponse)
 def retrieve_staff_ticket(
     ticket_id: int,
     db: Session = Depends(get_db),
@@ -186,12 +177,18 @@ def submit_ticket_decision(
     db: Session = Depends(get_db),
     current_user: StaffUserDB = Depends(get_current_user),
 ):
-    ticket = update_ticket_decision(
-        db=db,
-        ticket_id=ticket_id,
-        decision=request.decision,
-        new_status=request.status,
-    )
+    try:
+        ticket, changed = update_ticket_decision(
+            db=db,
+            ticket_id=ticket_id,
+            decision=request.decision,
+            new_status=request.status,
+        )
+    except TicketStatusTransitionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
 
     if ticket is None:
         raise HTTPException(
@@ -200,8 +197,9 @@ def submit_ticket_decision(
         )
 
     # Notify the customer when an email address is available.
-    if ticket.customer_email:
-        send_ticket_decision_email(
+    email_notification_sent = False
+    if changed and ticket.customer_email:
+        email_notification_sent = send_ticket_decision_email(
             recipient=ticket.customer_email,
             customer_name=ticket.customer_name,
             ticket_id=ticket.id,
@@ -210,6 +208,7 @@ def submit_ticket_decision(
         )
 
     return {
-        "message": "Ticket decision updated successfully.",
+        "message": "Ticket decision updated successfully." if changed else "No ticket changes to apply.",
+        "email_notification_sent": email_notification_sent,
         "ticket": ticket,
     }

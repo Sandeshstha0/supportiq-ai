@@ -2,6 +2,8 @@
 from datetime import datetime
 from decimal import Decimal
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
@@ -43,3 +45,22 @@ class OrderResponse(BaseModel):
     status: str
     created_at: datetime
     items: list[OrderItemResponse]
+
+
+class OrderStatusUpdate(BaseModel):
+    status: Literal[
+        "pending_confirmation",
+        "confirmed",
+        "processing",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+    ]
+
+
+class OrderListResponse(BaseModel):
+    items: list[OrderResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
