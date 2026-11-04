@@ -13,6 +13,8 @@ from app.api.dependencies import get_current_user
 from app.api.orders import router as orders_router
 from app.api.customers import router as customers_router
 from app.api.tickets import router as tickets_router
+from app.api.chat import router as chat_router
+from app.api.conversations import router as conversations_router
 from app.db.database import Base, get_db
 from app.models.conversation import ConversationDB, GuestSessionDB, MessageDB
 from app.models.order import OrderDB, OrderItemDB
@@ -78,6 +80,8 @@ class OrderManagementTests(unittest.TestCase):
         self.api.include_router(orders_router)
         self.api.include_router(customers_router)
         self.api.include_router(tickets_router)
+        self.api.include_router(chat_router)
+        self.api.include_router(conversations_router)
 
         def override_db():
             session = self.Session()
@@ -108,6 +112,52 @@ class OrderManagementTests(unittest.TestCase):
     def test_staff_order_routes_reject_unauthenticated_requests(self):
         response = self.client.get("/api/v1/orders/staff/all")
         self.assertEqual(response.status_code, 401)
+
+    def test_staff_conversation_routes_require_authentication_and_filter(self):
+        first = ConversationDB(guest_session_id=self.guest_session.id)
+        second = ConversationDB(guest_session_id=None)
+        self.db.add_all([first, second])
+        self.db.flush()
+        self.db.add_all([
+            MessageDB(conversation_id=first.id, role="user", content="Help with an order", created_at=datetime(2026, 1, 1, tzinfo=timezone.utc)),
+            MessageDB(conversation_id=first.id, role="assistant", content="I can help", created_at=datetime(2026, 1, 1, 0, 1, tzinfo=timezone.utc)),
+        ])
+        self.db.commit()
+        self.assertEqual(self.client.get("/api/v1/conversations/staff/all").status_code, 401)
+
+        self.authorize_staff()
+        response = self.client.get("/api/v1/conversations/staff/all", params={"search": str(self.guest_session.id), "page_size": 1})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["items"][0]["id"], first.id)
+        self.assertEqual(payload["items"][0]["message_count"], 2)
+        self.assertTrue(payload["items"][0]["has_customer_profile"])
+
+        details = self.client.get(f"/api/v1/conversations/staff/{first.id}")
+        self.assertEqual(details.status_code, 200)
+        self.assertEqual(self.client.get("/api/v1/conversations/staff/999999").status_code, 404)
+        messages = details.json()["messages"]
+        self.assertEqual([message["role"] for message in messages], ["user", "assistant"])
+        self.assertLessEqual(messages[0]["created_at"], messages[1]["created_at"])
+        invalid_dates = self.client.get("/api/v1/conversations/staff/all", params={"date_from": "2026-02-01", "date_to": "2026-01-01"})
+        self.assertEqual(invalid_dates.status_code, 400)
+
+    def test_guest_conversation_endpoints_keep_guest_session_ownership(self):
+        token, _ = create_guest_session(self.db)
+        session = self.db.query(GuestSessionDB).filter(GuestSessionDB.id != self.guest_session.id).one()
+        conversation = ConversationDB(guest_session_id=session.id)
+        self.db.add(conversation)
+        self.db.flush()
+        self.db.add(MessageDB(conversation_id=conversation.id, role="user", content="Guest message"))
+        self.db.commit()
+
+        listing = self.client.get("/api/v1/chat/conversations", headers={"X-Guest-Session": token})
+        self.assertEqual(listing.status_code, 200)
+        self.assertEqual(listing.json()["conversations"][0]["conversation_id"], conversation.id)
+        history = self.client.get(f"/api/v1/chat/conversations/{conversation.id}", headers={"X-Guest-Session": token})
+        self.assertEqual(history.status_code, 200)
+        self.assertEqual(history.json()["messages"][0]["content"], "Guest message")
 
     def test_search_and_status_filter_are_paginated(self):
         self.authorize_staff()

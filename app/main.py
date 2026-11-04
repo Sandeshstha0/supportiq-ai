@@ -25,6 +25,7 @@ from app.api.dashboard import router as dashboard_router
 from app.models.order import OrderDB
 from app.api.orders import router as orders_router
 from app.api.customers import router as customers_router
+from app.api.conversations import router as conversations_router
 
 
 
@@ -85,3 +86,4 @@ app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(orders_router)
 app.include_router(customers_router)
+app.include_router(conversations_router)
