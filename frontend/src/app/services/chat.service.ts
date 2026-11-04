@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export interface ChatRequest {
   message: string;
@@ -43,8 +44,8 @@ export interface GuestSessionResponse {
 export class ChatService {
   private http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://127.0.0.1:8000/api/v1/chat';
-  private readonly guestUrl = 'http://127.0.0.1:8000/api/v1/guest';
+  private readonly apiUrl = `${API_BASE_URL}/chat`;
+  private readonly guestUrl = `${API_BASE_URL}/guest`;
 
   createOrGetGuestSession(
     sessionToken?: string

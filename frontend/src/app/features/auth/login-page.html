@@ -1,0 +1,55 @@
+<main class="login-page min-h-dvh text-slate-100">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="relative z-10 mx-auto grid min-h-dvh max-w-7xl items-center gap-12 px-5 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-12">
+    <section class="hidden lg:block">
+      <a routerLink="/" class="mb-16 inline-flex items-center gap-3" aria-label="SupportIQ customer support home">
+        <span class="brand-mark">S</span><span><b class="block text-lg tracking-tight">SupportIQ</b><small class="text-slate-400">LASATA DEPARTMENT STORES</small></span>
+      </a>
+      <div class="eyebrow"><span></span> STAFF WORKSPACE</div>
+      <h1 class="mt-5 max-w-xl text-5xl font-semibold leading-[1.12] tracking-tight xl:text-6xl">Support customers<br>with <span>clarity and care.</span></h1>
+      <p class="mt-6 max-w-lg text-base leading-7 text-slate-400">A focused workspace for the people who make every customer interaction count.</p>
+      <div class="mt-12 flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+        <div class="signal-icon"><span></span></div><div><p class="text-sm font-medium text-slate-200">Support operations</p><p class="mt-1 text-xs text-slate-500">Secure staff access · Lasata</p></div>
+        <div class="ml-auto rounded-full border border-sky-400/15 bg-sky-400/[0.07] px-3 py-1.5 text-[11px] font-medium tracking-wide text-sky-300">STAFF PORTAL</div>
+      </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-[440px]">
+      <a routerLink="/" class="mb-10 inline-flex items-center gap-3 lg:hidden"><span class="brand-mark">S</span><span><b class="block text-lg">SupportIQ</b><small class="text-slate-400">LASATA DEPARTMENT STORES</small></span></a>
+      <div class="login-card rounded-3xl p-7 sm:p-9">
+        <div class="mb-8">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-300/[0.09] text-sky-300">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4.5 6v5.4c0 4.7 3.2 8.1 7.5 9.6 4.3-1.5 7.5-4.9 7.5-9.6V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Welcome back</p>
+          <h2 class="mt-2 text-2xl font-semibold tracking-tight text-white">Sign in to your account</h2>
+          <p class="mt-2 text-sm text-slate-400">Use your staff username and password to continue.</p>
+        </div>
+
+        @if (expiredNotice) { <div class="mb-5 rounded-xl border border-amber-300/20 bg-amber-300/[0.07] px-4 py-3 text-sm text-amber-200">Your session expired. Please sign in again.</div> }
+        @if (errorMessage()) { <div role="alert" class="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] px-4 py-3 text-sm text-rose-200">{{ errorMessage() }}</div> }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-5">
+          <div>
+            <label for="username" class="mb-2 block text-sm font-medium text-slate-200">Username</label>
+            <div class="field-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><input id="username" formControlName="username" autocomplete="username" placeholder="Enter your username" [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid" /></div>
+            @if (form.controls.username.touched && form.controls.username.errors) { <p class="mt-2 text-xs text-rose-300">@if (form.controls.username.errors['required']) { Username is required. } @else { Username must be at least 3 characters. }</p> }
+          </div>
+
+          <div>
+            <label for="password" class="mb-2 block text-sm font-medium text-slate-200">Password</label>
+            <div class="field-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input id="password" [type]="passwordVisible() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Enter your password" [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid" /><button type="button" class="reveal" (click)="passwordVisible.set(!passwordVisible())" [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+            @if (form.controls.password.touched && form.controls.password.invalid) { <p class="mt-2 text-xs text-rose-300">Password is required.</p> }
+          </div>
+
+          <button class="submit-button flex h-12 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#071321] transition disabled:cursor-not-allowed disabled:opacity-60" type="submit" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> Signing in... } @else { Sign in <span aria-hidden="true">→</span> }
+          </button>
+        </form>
+
+        <div class="mt-7 flex items-center justify-center gap-2 text-xs text-slate-500"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Protected staff access</div>
+      </div>
+      <p class="mt-6 text-center text-xs text-slate-600">© {{ currentYear }} Lasata Department Stores · SupportIQ AI</p>
+    </section>
+  </div>
+</main>
