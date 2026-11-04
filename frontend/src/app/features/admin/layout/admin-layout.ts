@@ -33,7 +33,7 @@ export class AdminLayout {
     { label: 'Customers', path: '/admin/customers', icon: 'users' },
     { label: 'Conversations', path: '/admin/conversations', icon: 'message' },
     { label: 'Products', path: '/admin/products', icon: 'package' },
-    { label: 'Knowledge Base', path: '/admin/knowledge', icon: 'book' },
+    { label: 'Knowledge Base', path: '/admin/knowledge-base', icon: 'book' },
     { label: 'Staff Management', path: '/admin/staff', icon: 'staff', adminOnly: true },
     { label: 'Settings', path: '/admin/settings', icon: 'settings' },
   ];
