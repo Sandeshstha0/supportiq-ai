@@ -66,41 +66,13 @@
         class="flex w-full items-center gap-3 rounded-lg bg-blue-500/10 px-3 py-3 text-sm font-medium text-blue-400"
       >
         <span class="text-lg">◫</span>
+
         @if (!collapsed()) {
           <span>AI Assistant</span>
         }
       </button>
-
-<!-- 
-      <button
-        title="Conversation History"
-        [class.justify-center]="collapsed()"
-        class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
-      >
-        <span class="text-lg">◷</span>
-        @if (!collapsed()) {
-          <span>Conversation History</span>
-        }
-      </button>
-      -->
-
-
-<!-- 
-
-      <button
-        title="Support Tickets"
-        [class.justify-center]="collapsed()"
-        class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
-      >
-        <span class="text-lg">◈</span>
-        @if (!collapsed()) {
-          <span>Support Tickets</span>
-        }
-      </button>
     </nav>
   </div>
-
-  -->
 
   <!-- Recent Conversations -->
   @if (!collapsed()) {
