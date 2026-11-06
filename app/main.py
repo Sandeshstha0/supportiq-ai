@@ -1,36 +1,38 @@
 
+import os
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from dotenv import load_dotenv
 
 # Load environment variables before importing application services.
 load_dotenv()
 
+# Application routers
 from app.api.products import router as products_router
 from app.api.chat import router as chat_router
 from app.api.tickets import router as tickets_router
 from app.api import knowledge
-
-from app.db.database import Base, engine
-from app.models.product import ProductDB
-from app.models.ticket import SupportTicketDB
 from app.api.auth import router as auth_router
-from app.models.conversation import ConversationDB
-from app.models.staff import StaffUserDB
 from app.api import guest
 from app.api.dashboard import router as dashboard_router
-from app.models.order import OrderDB
 from app.api.orders import router as orders_router
 from app.api.customers import router as customers_router
 from app.api.conversations import router as conversations_router
 
+# Database and models
+from app.db.database import Base, engine
+from app.models.product import ProductDB
+from app.models.ticket import SupportTicketDB
+from app.models.conversation import ConversationDB
+from app.models.staff import StaffUserDB
+from app.models.order import OrderDB
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Initialize application resources."""
     Base.metadata.create_all(bind=engine)
     yield
 
@@ -43,19 +45,27 @@ app = FastAPI(
 )
 
 
-# Allow Angular frontend to communicate with FastAPI
+# CORS configuration
+# Supports local development and deployed frontend domains.
+allowed_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv(
+        "FRONTEND_URLS",
+        "http://localhost:4200,http://127.0.0.1:4200",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# Root endpoint
 @app.get("/")
 def home():
     return {
@@ -64,6 +74,7 @@ def home():
     }
 
 
+# Health check endpoint for Render
 @app.get("/health")
 def health_check():
     return {
@@ -72,6 +83,7 @@ def health_check():
     }
 
 
+# Register API routers
 app.include_router(products_router)
 app.include_router(chat_router)
 app.include_router(tickets_router)
