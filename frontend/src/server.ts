@@ -16,7 +16,10 @@ const angularApp = new AngularNodeAppEngine({
     '127.0.0.1',
     'supportiq-ai-fontend.onrender.com',
   ],
-});/**
+  trustProxyHeaders: true,
+});
+
+/**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
  *
