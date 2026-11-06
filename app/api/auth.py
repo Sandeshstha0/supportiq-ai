@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -9,9 +9,18 @@ from app.services.auth_service import (
     create_access_token,
 )
 from app.api.dependencies import get_current_user
-from app.schemas.auth import StaffCreate
-from app.services.auth_service import hash_password
+from app.schemas.auth import StaffCreate, StaffUpdate
 from app.api.dependencies import require_admin
+from app.services.staff_management_service import (
+    LastActiveAdminError,
+    StaffConflictError,
+    StaffProtectionError,
+    create_staff_member,
+    get_staff_member,
+    list_staff,
+    update_staff_member,
+    update_staff_status as change_staff_status,
+)
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -75,66 +84,85 @@ def create_staff(
     db: Session = Depends(get_db),
     current_admin: StaffUserDB = Depends(require_admin),
 ):
-    existing_user = (
-        db.query(StaffUserDB)
-        .filter(
-            (StaffUserDB.username == request.username)
-            | (StaffUserDB.email == request.email)
-        )
-        .first()
-    )
-
-    if existing_user:
+    try:
+        staff = create_staff_member(db, request.model_dump())
+    except StaffConflictError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Username or email is already registered.",
-        )
-
-    staff = StaffUserDB(
-        username=request.username,
-        email=str(request.email),
-        password_hash=hash_password(request.password),
-        role="staff",
-        is_active=True,
-    )
-
-    db.add(staff)
-    db.commit()
-    db.refresh(staff)
+            detail=str(exc),
+        ) from exc
 
     return {
         "message": "Staff account created successfully.",
-        "staff": {
-            "id": staff.id,
-            "username": staff.username,
-            "email": staff.email,
-            "role": staff.role,
-            "is_active": staff.is_active,
-        },
+        "staff": staff,
     }
 
 @router.get("/staff")
 def get_all_staff(
+    search: str | None = Query(default=None, max_length=100),
+    page: int | None = Query(default=None, ge=1),
+    page_size: int | None = Query(default=None, ge=1, le=100),
     db: Session = Depends(get_db),
     current_admin: StaffUserDB = Depends(require_admin),
 ):
-    staff_members = (
-        db.query(StaffUserDB)
-        .order_by(StaffUserDB.created_at.desc())
-        .all()
+    if search is None and page is None and page_size is None:
+        staff_members = db.query(StaffUserDB).order_by(
+            StaffUserDB.created_at.desc(), StaffUserDB.id.desc(),
+        ).all()
+        return [
+            {
+                "id": staff.id,
+                "username": staff.username,
+                "email": staff.email,
+                "role": staff.role,
+                "is_active": staff.is_active,
+                "created_at": staff.created_at,
+            }
+            for staff in staff_members
+        ]
+    return list_staff(
+        db,
+        search=search,
+        page=page or 1,
+        page_size=page_size or 20,
     )
 
-    return [
-        {
-            "id": staff.id,
-            "username": staff.username,
-            "email": staff.email,
-            "role": staff.role,
-            "is_active": staff.is_active,
-            "created_at": staff.created_at,
-        }
-        for staff in staff_members
-    ]
+
+@router.get("/staff/{staff_id}")
+def retrieve_staff_member(
+    staff_id: int,
+    db: Session = Depends(get_db),
+    current_admin: StaffUserDB = Depends(require_admin),
+):
+    staff = get_staff_member(db, staff_id)
+    if staff is None:
+        raise HTTPException(status_code=404, detail="Staff account not found.")
+    return staff
+
+
+@router.patch("/staff/{staff_id}")
+def edit_staff_member(
+    staff_id: int,
+    request: StaffUpdate,
+    db: Session = Depends(get_db),
+    current_admin: StaffUserDB = Depends(require_admin),
+):
+    try:
+        staff = update_staff_member(
+            db,
+            staff_id,
+            request.model_dump(exclude_unset=True),
+            current_admin_id=current_admin.id,
+        )
+    except StaffConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except StaffProtectionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except LastActiveAdminError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    if staff is None:
+        raise HTTPException(status_code=404, detail="Staff account not found.")
+    return {"message": "Staff profile updated successfully.", "staff": staff}
 
 @router.patch("/staff/{staff_id}/status")
 def update_staff_status(
@@ -143,27 +171,14 @@ def update_staff_status(
     db: Session = Depends(get_db),
     current_admin: StaffUserDB = Depends(require_admin),
 ):
-    staff = db.query(StaffUserDB).filter(
-        StaffUserDB.id == staff_id
-    ).first()
-
+    try:
+        staff = change_staff_status(db, staff_id, is_active, current_admin.id)
+    except StaffProtectionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except LastActiveAdminError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     if staff is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Staff account not found.",
-        )
-
-    # Prevent an admin from deactivating their own account
-    if staff.id == current_admin.id and not is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot deactivate your own account.",
-        )
-
-    staff.is_active = is_active
-
-    db.commit()
-    db.refresh(staff)
+        raise HTTPException(status_code=404, detail="Staff account not found.")
 
     return {
         "message": (
@@ -171,11 +186,5 @@ def update_staff_status(
             if is_active
             else "Staff account deactivated successfully."
         ),
-        "staff": {
-            "id": staff.id,
-            "username": staff.username,
-            "email": staff.email,
-            "role": staff.role,
-            "is_active": staff.is_active,
-        },
+        "staff": staff,
     }

@@ -1,0 +1,251 @@
+
+<div class="min-h-screen bg-[#080F1D] p-4 text-white sm:p-6 lg:p-8">
+
+  <!-- Header -->
+  <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+        Administration
+      </p>
+      <h1 class="text-3xl font-bold tracking-tight">Settings</h1>
+      <p class="mt-2 text-sm text-slate-400">
+        Manage your store, AI assistant and support preferences.
+      </p>
+    </div>
+
+    <button
+      (click)="saveSettings()"
+      class="rounded-xl bg-sky-500 px-5 py-3 text-sm font-semibold text-[#081321] shadow-lg shadow-sky-500/20 transition hover:bg-sky-400">
+      Save Changes
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
+
+    <!-- Sidebar -->
+    <aside class="h-fit rounded-2xl border border-white/10 bg-[#101B2D] p-3">
+      <p class="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Configuration
+      </p>
+
+      <button
+        *ngFor="let tab of tabs"
+        (click)="setTab(tab.id)"
+        class="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm transition"
+        [ngClass]="activeTab === tab.id
+          ? 'bg-sky-500/15 text-sky-400'
+          : 'text-slate-400 hover:bg-white/5 hover:text-white'">
+
+        <span class="text-lg">{{ tab.icon }}</span>
+        <span class="font-medium">{{ tab.label }}</span>
+
+        <span *ngIf="activeTab === tab.id"
+          class="ml-auto h-2 w-2 rounded-full bg-sky-400"></span>
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="min-w-0 rounded-2xl border border-white/10 bg-[#101B2D] p-5 sm:p-7">
+
+      <!-- GENERAL -->
+      <section *ngIf="activeTab === 'general'">
+        <h2 class="text-xl font-bold">General Settings</h2>
+        <p class="mt-1 text-sm text-slate-400">Basic information about your store.</p>
+
+        <div class="mt-7 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label class="field-label">Store Name</label>
+            <input class="field-input" [(ngModel)]="settings.storeName">
+          </div>
+
+          <div>
+            <label class="field-label">Support Email</label>
+            <input class="field-input" type="email" [(ngModel)]="settings.email">
+          </div>
+
+          <div>
+            <label class="field-label">Contact Number</label>
+            <input class="field-input" [(ngModel)]="settings.phone">
+          </div>
+
+          <div>
+            <label class="field-label">Store Address</label>
+            <input class="field-input" [(ngModel)]="settings.address">
+          </div>
+        </div>
+      </section>
+
+      <!-- AI AGENT -->
+      <section *ngIf="activeTab === 'ai'">
+        <h2 class="text-xl font-bold">AI Agent Settings</h2>
+        <p class="mt-1 text-sm text-slate-400">Customize your SupportIQ AI assistant.</p>
+
+        <div class="mt-7 space-y-5">
+          <div>
+            <label class="field-label">Assistant Name</label>
+            <input class="field-input" [(ngModel)]="settings.assistantName">
+          </div>
+
+          <div>
+            <label class="field-label">Welcome Message</label>
+            <textarea rows="3" class="field-input"
+              [(ngModel)]="settings.welcomeMessage"></textarea>
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label class="field-label">Response Style</label>
+              <select class="field-input" [(ngModel)]="settings.responseStyle">
+                <option>Friendly and Professional</option>
+                <option>Formal</option>
+                <option>Casual</option>
+                <option>Concise</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="field-label">Supported Languages</label>
+              <select class="field-input" [(ngModel)]="settings.language">
+                <option>English and Nepali</option>
+                <option>English</option>
+                <option>Nepali</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Enable AI Assistant</p>
+              <p class="text-xs text-slate-400">Allow customers to interact with the AI.</p>
+            </div>
+            <input type="checkbox" class="toggle" [(ngModel)]="settings.aiEnabled">
+          </div>
+        </div>
+      </section>
+
+      <!-- SUPPORT -->
+      <section *ngIf="activeTab === 'support'">
+        <h2 class="text-xl font-bold">Support Settings</h2>
+        <p class="mt-1 text-sm text-slate-400">Manage customer support preferences.</p>
+
+        <div class="mt-7 space-y-5">
+          <div>
+            <label class="field-label">Support Hours</label>
+            <input class="field-input" [(ngModel)]="settings.supportHours">
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Automatic Ticket Creation</p>
+              <p class="text-xs text-slate-400">Allow the AI to create support tickets.</p>
+            </div>
+            <input type="checkbox" class="toggle" [(ngModel)]="settings.autoTicket">
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Human Handoff</p>
+              <p class="text-xs text-slate-400">Allow complex issues to reach human staff.</p>
+            </div>
+            <input type="checkbox" class="toggle" [(ngModel)]="settings.humanHandoff">
+          </div>
+        </div>
+      </section>
+
+      <!-- DELIVERY -->
+      <section *ngIf="activeTab === 'delivery'">
+        <h2 class="text-xl font-bold">Order & Delivery Settings</h2>
+        <p class="mt-1 text-sm text-slate-400">Configure your home delivery policy.</p>
+
+        <div class="mt-7 space-y-5">
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Enable Home Delivery</p>
+              <p class="text-xs text-slate-400">Allow eligible customers to request delivery.</p>
+            </div>
+            <input type="checkbox" class="toggle" [(ngModel)]="settings.homeDelivery">
+          </div>
+
+          <div>
+            <label class="field-label">Delivery Area</label>
+            <input class="field-input" [(ngModel)]="settings.deliveryArea">
+          </div>
+
+          <div>
+            <label class="field-label">Eligible Ward Numbers</label>
+            <input class="field-input" [(ngModel)]="settings.deliveryWards">
+            <p class="mt-2 text-xs text-amber-400">
+              Current policy: Home delivery is available only in Byas 2, 3 and 4, Damauli.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- EMAIL -->
+      <section *ngIf="activeTab === 'email'">
+        <h2 class="text-xl font-bold">Email Notifications</h2>
+        <p class="mt-1 text-sm text-slate-400">Manage customer email notifications.</p>
+
+        <div class="mt-7 space-y-5">
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Email Notifications</p>
+              <p class="text-xs text-slate-400">Enable email notifications.</p>
+            </div>
+            <input type="checkbox" class="toggle"
+              [(ngModel)]="settings.emailNotifications">
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Ticket Confirmation Email</p>
+              <p class="text-xs text-slate-400">Notify customers when a ticket is created.</p>
+            </div>
+            <input type="checkbox" class="toggle"
+              [(ngModel)]="settings.ticketConfirmation">
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Ticket Decision Email</p>
+              <p class="text-xs text-slate-400">Notify customers when staff updates a ticket.</p>
+            </div>
+            <input type="checkbox" class="toggle"
+              [(ngModel)]="settings.ticketDecision">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECURITY -->
+      <section *ngIf="activeTab === 'security'">
+        <h2 class="text-xl font-bold">Security Settings</h2>
+        <p class="mt-1 text-sm text-slate-400">Manage your administrator security preferences.</p>
+
+        <div class="mt-7 space-y-5">
+          <div class="setting-row">
+            <div>
+              <p class="font-medium">Two-Factor Authentication</p>
+              <p class="text-xs text-slate-400">Two-factor authentication preference.</p>
+            </div>
+            <input type="checkbox" class="toggle" [(ngModel)]="settings.twoFactor">
+          </div>
+
+          <div class="rounded-xl border border-amber-400/20 bg-amber-400/5 p-4">
+            <p class="font-semibold text-amber-300">Security notice</p>
+            <p class="mt-1 text-sm text-slate-400">
+              These settings are currently frontend preferences. Authentication
+              and security enforcement must be implemented on the backend.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Save status -->
+      <div *ngIf="saved"
+        class="mt-8 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-300">
+        Settings updated in the current page. Backend persistence is not connected yet.
+      </div>
+
+    </main>
+  </div>
+</div>

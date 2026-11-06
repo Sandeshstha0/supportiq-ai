@@ -1,0 +1,27 @@
+
+# Python environment
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Frontend (built separately)
+frontend/
+node_modules/
+
+# Qdrant local data
+qdrant_storage/
+
+# Temporary files
+*.log
+.DS_Store

@@ -4,7 +4,7 @@ import { adminRoleGuard, authenticatedGuard, guestOnlyGuard } from './core/auth.
 import { LoginPage } from './features/auth/login-page';
 
 const placeholder = (title: string, description: string, availability: string, endpoints: string) => ({
-  path: title === 'Knowledge Base' ? 'knowledge' : title === 'Staff Management' ? 'staff' : title.toLowerCase().replaceAll(' ', '-'),
+  path: title === 'Staff Management' ? 'staff' : title.toLowerCase().replaceAll(' ', '-'),
   loadComponent: () => import('./features/admin/placeholder-page').then(module => module.PlaceholderPage),
   data: { section: { title, description, availability, endpoints } },
 });
@@ -22,10 +22,11 @@ export const routes: Routes = [
       { path: 'orders', loadComponent: () => import('./features/admin/orders/orders-page').then(module => module.OrdersPage) },
       { path: 'customers', loadComponent: () => import('./features/admin/customers/customers-page').then(module => module.CustomersPage) },
       { path: 'conversations', loadComponent: () => import('./features/admin/conversations/conversations-page').then(module => module.ConversationsPage) },
-      placeholder('Products', 'Product catalog, pricing, and stock information.', 'Read-only product APIs are available. Product administration actions are not supported.', 'Available: GET /api/v1/products, GET /api/v1/products/{id}, and GET /api/v1/products/{id}/stock. Product UI is deferred to a later phase.'),
-      placeholder('Knowledge Base', 'Store policies and support information used by the assistant.', 'Knowledge search and document upload APIs exist; document management APIs do not.', 'Search: GET /api/v1/knowledge/search. Upload uses a separate admin API key, not staff JWT authentication.'),
-      { ...placeholder('Staff Management', 'Staff accounts, roles, and account access.', 'Staff APIs are available, but staff management UI is deferred to a later phase.', 'Available under admin authorization: GET/POST /api/v1/auth/staff and PATCH /api/v1/auth/staff/{id}/status.'), canActivate: [adminRoleGuard] },
-      placeholder('Settings', 'Your SupportIQ account and application preferences.', 'Profile retrieval exists; application settings APIs are not available.', 'Available: GET /api/v1/auth/me. No settings update endpoint exists.'),
+      { path: 'knowledge', pathMatch: 'full', redirectTo: 'knowledge-base' },
+      { path: 'knowledge-base', loadComponent: () => import('./features/admin/knowledge-base/knowledge-base-page').then(module => module.KnowledgeBasePage) },
+      { path: 'products', loadComponent: () => import('./features/admin/products/products-page').then(module => module.ProductsPage) },
+      { path: 'staff', loadComponent: () => import('./features/admin/staff/staff-page').then(module => module.StaffPage), canActivate: [adminRoleGuard] },
+      { path: 'settings', loadComponent: () => import('./features/admin/settings/settings-page').then(module => module.SettingsComponent),canActivate: [adminRoleGuard]},
     ],
   },
   { path: '**', redirectTo: '' },
