@@ -11,9 +11,12 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine({
-  allowedHosts: ['localhost', '127.0.0.1'],
-});
-/**
+  allowedHosts: [
+    'localhost',
+    '127.0.0.1',
+    'supportiq-ai-fontend.onrender.com',
+  ],
+});/**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
  *
