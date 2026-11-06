@@ -1,0 +1,57 @@
+
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field-input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 12px;
+  background: #080f1d;
+  padding: 12px 14px;
+  color: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+  }
+
+  &::placeholder {
+    color: #64748b;
+  }
+
+  option {
+    background: #101b2d;
+  }
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  background: rgba(8, 15, 29, 0.65);
+  padding: 16px;
+}
+
+.toggle {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}

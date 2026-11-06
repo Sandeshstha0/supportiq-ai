@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: supportiq-backend
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    environment:
+      QDRANT_PATH: /app/qdrant_storage
+
+    volumes:
+      - ./qdrant_storage:/app/qdrant_storage
+
+    restart: unless-stopped
+    init: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: supportiq-frontend
+
+    ports:
+      - "4200:4000"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+    init: true

@@ -26,7 +26,7 @@ export const routes: Routes = [
       { path: 'knowledge-base', loadComponent: () => import('./features/admin/knowledge-base/knowledge-base-page').then(module => module.KnowledgeBasePage) },
       { path: 'products', loadComponent: () => import('./features/admin/products/products-page').then(module => module.ProductsPage) },
       { path: 'staff', loadComponent: () => import('./features/admin/staff/staff-page').then(module => module.StaffPage), canActivate: [adminRoleGuard] },
-      placeholder('Settings', 'Your SupportIQ account and application preferences.', 'Profile retrieval exists; application settings APIs are not available.', 'Available: GET /api/v1/auth/me. No settings update endpoint exists.'),
+      { path: 'settings', loadComponent: () => import('./features/admin/settings/settings-page').then(module => module.SettingsComponent),canActivate: [adminRoleGuard]},
     ],
   },
   { path: '**', redirectTo: '' },
