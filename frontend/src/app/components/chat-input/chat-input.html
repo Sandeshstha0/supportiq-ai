@@ -1,7 +1,5 @@
-
 <div class="relative shrink-0 border-t border-sky-400/10 bg-transparent px-4 pb-5 pt-4 md:px-8">
   <div class="mx-auto max-w-4xl">
-
     <div
       class="composer-box rounded-2xl border border-slate-700/70 bg-[#111E30] p-3"
       [class.composer-expanded]="isExpanded()"
@@ -19,38 +17,51 @@
       ></textarea>
 
       <div class="flex items-center justify-between gap-3 px-2 pt-2">
-        <span class="text-xs text-slate-500">
-          Ask about products, orders or store policies
-        </span>
+        <span class="text-xs text-slate-500"> Ask about products, orders or store policies </span>
 
         <div class="flex items-center gap-3">
-          <span class="text-[10px] text-slate-600">
-            {{ message().length }}/2000
-          </span>
+          <span class="text-[10px] text-slate-600"> {{ message().length }}/2000 </span>
 
-          
-<button
-  type="button"
-  (click)="sendMessage()"
-  [disabled]="!message().trim() || loading()"
-  class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-500 text-[#081321] shadow-lg shadow-sky-500/20 transition duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100"
-  [title]="loading() ? 'AI is responding...' : 'Send message'"
->
-  @if (loading()) {
-    <span class="h-5 w-5 animate-spin rounded-full border-2 border-[#081321]/30 border-t-[#081321]"></span>
-  } @else {
-    <span class="text-xl font-bold">↑</span>
-  }
-</button>
-
+          <button
+            type="button"
+            (click)="sendMessage()"
+            [disabled]="!message().trim() || loading()"
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-500 text-[#081321] shadow-lg shadow-sky-500/20 transition duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100"
+            [title]="loading() ? 'AI is responding...' : 'Send message'"
+          >
+            @if (loading()) {
+              <span
+                class="h-5 w-5 animate-spin rounded-full border-2 border-[#081321]/30 border-t-[#081321]"
+              ></span>
+            } @else {
+              <span class="text-xl font-bold">↑</span>
+            }
+          </button>
         </div>
       </div>
     </div>
 
-    <p class="mt-3 text-center text-xs text-slate-500">
-      <span class="text-yellow-400">✦</span>
-      SupportIQ AI can make mistakes. Verify important information with Lasata.
-    </p>
+    <div class="mt-3 flex items-center justify-center gap-2 text-[10px] text-slate-500">
+      <p class="mt-3 text-center text-xs text-slate-500">
+        <span class="text-yellow-400">✦</span>
+        SupportIQ AI can make mistakes. Verify important information with Lasata.
+      </p>
 
+      <div class="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+        <span>Crafted with</span>
+        <span class="text-rose-400">♥</span>
+        <span>by</span>
+
+        <a
+          href="https://sandesh-portfolio-beta.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold text-sky-400 transition-colors duration-200 hover:text-sky-300 hover:underline"
+        >
+          Sandesh Shrestha
+          <span class="ml-0.5">↗</span>
+        </a>
+      </div>
+    </div>
   </div>
 </div>

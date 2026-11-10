@@ -1,40 +1,140 @@
 <div class="flex h-dvh overflow-hidden bg-[#080F1D] text-slate-100">
   @if (mobileOpen()) {
-    <button class="fixed inset-0 z-40 bg-black/65 md:hidden" aria-label="Close navigation" (click)="closeMobile()"></button>
+    <button
+      class="fixed inset-0 z-40 bg-black/65 md:hidden"
+      aria-label="Close navigation"
+      (click)="closeMobile()"
+    ></button>
   }
 
-  <aside class="admin-sidebar fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/[0.07] bg-[#0B1423] transition-all duration-300 md:static md:z-auto"
-    [class.sidebar-expanded]="!collapsed()" [class.sidebar-collapsed]="collapsed()" [class.mobile-visible]="mobileOpen()">
-    <div class="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.07] px-4">
+  <aside
+    class="admin-sidebar fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/[0.07] bg-[#0B1423] transition-all duration-300 md:static md:z-auto"
+    [class.sidebar-expanded]="!collapsed()"
+    [class.sidebar-collapsed]="collapsed()"
+    [class.mobile-visible]="mobileOpen()"
+  >
+    <div
+      class="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.07] px-4"
+    >
       <a routerLink="/admin" class="flex min-w-0 items-center gap-3" (click)="closeMobile()">
-        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky-300 to-sky-500 text-xl font-extrabold text-[#081321] shadow-lg shadow-sky-500/15">S</span>
-        @if (!collapsed()) { <span class="min-w-0"><b class="block truncate text-sm tracking-tight">SupportIQ AI</b><small class="text-[10px] tracking-wide text-slate-500">LASATA WORKSPACE</small></span> }
+        <img
+          src="/chatbotlogo.png"
+          alt="SupportIQ Logo"
+          class="h-10 w-10 shrink-0 rounded-xl object-contain"
+        />
+        @if (!collapsed()) {
+          <span class="min-w-0"
+            ><b class="block truncate text-sm tracking-tight">NexaSupport AI</b
+            ><small class="text-[10px] tracking-wide text-slate-500">LASATA WORKSPACE</small></span
+          >
+        }
       </a>
-      <button class="hidden h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-white/[0.06] hover:text-white md:grid" (click)="toggleCollapse()" [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6-6 6 6 6"/></svg>
+      <button
+        class="hidden h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-white/[0.06] hover:text-white md:grid"
+        (click)="toggleCollapse()"
+        [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path d="m14 6-6 6 6 6" />
+        </svg>
       </button>
-      <button class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-white/[0.06] md:hidden" aria-label="Close navigation" (click)="closeMobile()">×</button>
+      <button
+        class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-white/[0.06] md:hidden"
+        aria-label="Close navigation"
+        (click)="closeMobile()"
+      >
+        ×
+      </button>
     </div>
 
-    <div class="px-3 pt-6"><p class="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-slate-600" [class.sr-only]="collapsed()">Workspace</p>
+    <div class="px-3 pt-6">
+      <p
+        class="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-slate-600"
+        [class.sr-only]="collapsed()"
+      >
+        Workspace
+      </p>
       <nav class="space-y-1">
         @for (item of visibleNavItems; track item.path) {
-          <a [routerLink]="item.path" [routerLinkActiveOptions]="{ exact: item.path === '/admin' }" routerLinkActive="nav-active" [title]="collapsed() ? item.label : ''" (click)="closeMobile()" class="nav-item group flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-slate-400 transition hover:bg-white/[0.045] hover:text-slate-100">
-            <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+          <a
+            [routerLink]="item.path"
+            [routerLinkActiveOptions]="{ exact: item.path === '/admin' }"
+            routerLinkActive="nav-active"
+            [title]="collapsed() ? item.label : ''"
+            (click)="closeMobile()"
+            class="nav-item group flex h-11 items-center gap-3 rounded-xl px-3 text-sm text-slate-400 transition hover:bg-white/[0.045] hover:text-slate-100"
+          >
+            <svg
+              class="h-[18px] w-[18px] shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.65"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               @switch (item.icon) {
-                @case ('grid') { <rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/> }
-                @case ('ticket') { <path d="M4 7.5A2.5 2.5 0 0 0 4 12.5v4A1.5 1.5 0 0 0 5.5 18h13a1.5 1.5 0 0 0 1.5-1.5v-4a2.5 2.5 0 0 0 0-5v-1A1.5 1.5 0 0 0 18.5 5h-13A1.5 1.5 0 0 0 4 6.5v1Z"/><path d="M13 5v2m0 3v2m0 3v2"/> }
-                @case ('box') { <path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 8 9 5 9-5m-18 0v8l9 5 9-5V8m-9 5v8"/> }
-                @case ('users') { <path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-4A4.5 4.5 0 0 0 3 18.5V20"/><circle cx="9.5" cy="7" r="4"/><path d="M17 11a4 4 0 1 0-1-7.9M17 14h.5a4.5 4.5 0 0 1 4.5 4.5V20"/> }
-                @case ('message') { <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.7 8.7 0 0 1-3.8-.8L4 20l1.1-3.4A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z"/><path d="M8 12h8m-8 3h5"/> }
-                @case ('package') { <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.7 8-4.7M12 12v9m-4-16.5 8 4.7"/> }
-                @case ('book') { <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 17a2.5 2.5 0 0 1 2.5-2.5H20M8 7h8m-8 4h6"/> }
-                @case ('staff') { <circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0m2-8.5a3.5 3.5 0 1 0-1-6.9M18 14a5.5 5.5 0 0 1 3.5 5.1"/> }
-                @case ('settings') { <circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.3 1-1.4 2.4-1.6-.6a8 8 0 0 1-1.8 1l-.3 1.7h-2.8l-.3-1.7a8 8 0 0 1-1.8-1l-1.6.6-1.4-2.4 1.3-1a8 8 0 0 1 0-2l-1.3-1 1.4-2.4 1.6.6a8 8 0 0 1 1.8-1l.3-1.7h2.8l.3 1.7a8 8 0 0 1 1.8 1l1.6-.6 1.4 2.4-1.3 1a8 8 0 0 1 0 2Z"/> }
+                @case ('grid') {
+                  <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+                  <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+                  <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+                  <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+                }
+                @case ('ticket') {
+                  <path
+                    d="M4 7.5A2.5 2.5 0 0 0 4 12.5v4A1.5 1.5 0 0 0 5.5 18h13a1.5 1.5 0 0 0 1.5-1.5v-4a2.5 2.5 0 0 0 0-5v-1A1.5 1.5 0 0 0 18.5 5h-13A1.5 1.5 0 0 0 4 6.5v1Z"
+                  />
+                  <path d="M13 5v2m0 3v2m0 3v2" />
+                }
+                @case ('box') {
+                  <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+                  <path d="m3 8 9 5 9-5m-18 0v8l9 5 9-5V8m-9 5v8" />
+                }
+                @case ('users') {
+                  <path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-4A4.5 4.5 0 0 0 3 18.5V20" />
+                  <circle cx="9.5" cy="7" r="4" />
+                  <path d="M17 11a4 4 0 1 0-1-7.9M17 14h.5a4.5 4.5 0 0 1 4.5 4.5V20" />
+                }
+                @case ('message') {
+                  <path
+                    d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.7 8.7 0 0 1-3.8-.8L4 20l1.1-3.4A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z"
+                  />
+                  <path d="M8 12h8m-8 3h5" />
+                }
+                @case ('package') {
+                  <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+                  <path d="m4 7.5 8 4.7 8-4.7M12 12v9m-4-16.5 8 4.7" />
+                }
+                @case ('book') {
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z" />
+                  <path d="M4 17a2.5 2.5 0 0 1 2.5-2.5H20M8 7h8m-8 4h6" />
+                }
+                @case ('staff') {
+                  <circle cx="9" cy="8" r="3.5" />
+                  <path
+                    d="M2.5 20a6.5 6.5 0 0 1 13 0m2-8.5a3.5 3.5 0 1 0-1-6.9M18 14a5.5 5.5 0 0 1 3.5 5.1"
+                  />
+                }
+                @case ('settings') {
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="m19.4 15 .1.1 1.3 1-1.4 2.4-1.6-.6a8 8 0 0 1-1.8 1l-.3 1.7h-2.8l-.3-1.7a8 8 0 0 1-1.8-1l-1.6.6-1.4-2.4 1.3-1a8 8 0 0 1 0-2l-1.3-1 1.4-2.4 1.6.6a8 8 0 0 1 1.8-1l.3-1.7h2.8l.3 1.7a8 8 0 0 1 1.8 1l1.6-.6 1.4 2.4-1.3 1a8 8 0 0 1 0 2Z"
+                  />
+                }
               }
             </svg>
-            @if (!collapsed()) { <span class="truncate">{{ item.label }}</span> }
-            @if (item.label === 'Dashboard' && !collapsed()) { <span class="ml-auto h-1.5 w-1.5 rounded-full bg-sky-300"></span> }
+            @if (!collapsed()) {
+              <span class="truncate">{{ item.label }}</span>
+            }
+            @if (item.label === 'Dashboard' && !collapsed()) {
+              <span class="ml-auto h-1.5 w-1.5 rounded-full bg-sky-300"></span>
+            }
           </a>
         }
       </nav>
@@ -42,22 +142,83 @@
 
     <div class="mt-auto border-t border-white/[0.07] p-3">
       <div class="flex items-center gap-3 rounded-xl p-2" [class.justify-center]="collapsed()">
-        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-sky-300/20 bg-sky-300/10 text-xs font-semibold text-sky-200">{{ (auth.currentUser()?.username || 'S').slice(0, 1).toUpperCase() }}</span>
-        @if (!collapsed()) { <div class="min-w-0 flex-1"><p class="truncate text-xs font-medium text-slate-200">{{ auth.currentUser()?.username }}</p><p class="mt-0.5 text-[10px] capitalize text-slate-500">{{ auth.currentUser()?.role }} account</p></div> }
+        <span
+          class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-sky-300/20 bg-sky-300/10 text-xs font-semibold text-sky-200"
+          >{{ (auth.currentUser()?.username || 'S').slice(0, 1).toUpperCase() }}</span
+        >
+        @if (!collapsed()) {
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-xs font-medium text-slate-200">
+              {{ auth.currentUser()?.username }}
+            </p>
+            <p class="mt-0.5 text-[10px] capitalize text-slate-500">
+              {{ auth.currentUser()?.role }} account
+            </p>
+          </div>
+        }
       </div>
     </div>
   </aside>
 
   <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
-    <header class="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0B1423]/85 px-4 sm:px-7">
+    <header
+      class="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0B1423]/85 px-4 sm:px-7"
+    >
       <div class="flex min-w-0 items-center gap-3">
-        <button class="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/[0.08] text-slate-300 md:hidden" aria-label="Open navigation" (click)="toggleMobile()"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        <div class="min-w-0"><div class="hidden items-center gap-2 text-[10px] font-medium uppercase tracking-[.14em] text-slate-600 sm:flex"><span>Workspace</span><span>/</span><span class="text-slate-400">{{ pageTitle() }}</span></div><h1 class="truncate text-lg font-semibold tracking-tight text-white">{{ pageTitle() }}</h1></div>
+        <button
+          class="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/[0.08] text-slate-300 md:hidden"
+          aria-label="Open navigation"
+          (click)="toggleMobile()"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div class="min-w-0">
+          <div
+            class="hidden items-center gap-2 text-[10px] font-medium uppercase tracking-[.14em] text-slate-600 sm:flex"
+          >
+            <span>Workspace</span><span>/</span
+            ><span class="text-slate-400">{{ pageTitle() }}</span>
+          </div>
+          <h1 class="truncate text-lg font-semibold tracking-tight text-white">
+            {{ pageTitle() }}
+          </h1>
+        </div>
       </div>
       <div class="flex items-center gap-3 sm:gap-5">
-        <div class="hidden text-right sm:block"><p class="text-xs font-medium text-slate-200">{{ auth.currentUser()?.username }}</p><p class="mt-0.5 text-[10px] capitalize text-slate-500">{{ auth.currentUser()?.role }}</p></div>
-        <span class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-sky-300 to-indigo-400 text-xs font-bold text-[#081321]">{{ (auth.currentUser()?.username || 'S').slice(0, 1).toUpperCase() }}</span>
-        <button (click)="logout()" class="flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] px-3 text-xs font-medium text-slate-400 transition hover:border-rose-300/20 hover:bg-rose-300/[0.06] hover:text-rose-200" title="Sign out"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5m5 5H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span class="hidden sm:inline">Sign out</span></button>
+        <div class="hidden text-right sm:block">
+          <p class="text-xs font-medium text-slate-200">{{ auth.currentUser()?.username }}</p>
+          <p class="mt-0.5 text-[10px] capitalize text-slate-500">{{ auth.currentUser()?.role }}</p>
+        </div>
+        <span
+          class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-sky-300 to-indigo-400 text-xs font-bold text-[#081321]"
+          >{{ (auth.currentUser()?.username || 'S').slice(0, 1).toUpperCase() }}</span
+        >
+        <button
+          (click)="logout()"
+          class="flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] px-3 text-xs font-medium text-slate-400 transition hover:border-rose-300/20 hover:bg-rose-300/[0.06] hover:text-rose-200"
+          title="Sign out"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M10 17l5-5-5-5m5 5H3" />
+            <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg
+          ><span class="hidden sm:inline">Sign out</span>
+        </button>
       </div>
     </header>
     <section class="min-h-0 flex-1 overflow-y-auto"><router-outlet /></section>
