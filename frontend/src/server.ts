@@ -14,6 +14,7 @@ const angularApp = new AngularNodeAppEngine({
   allowedHosts: [
     'localhost',
     '127.0.0.1',
+    '*.vercel.app',
     'supportiq-ai-fontend.onrender.com',
   ],
   trustProxyHeaders: true,
@@ -73,3 +74,5 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
 export const reqHandler = createNodeRequestHandler(app);
+
+export default reqHandler;

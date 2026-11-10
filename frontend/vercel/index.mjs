@@ -1,0 +1,1 @@
+export { default } from '../dist/frontend/server/server.mjs';
