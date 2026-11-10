@@ -30,6 +30,38 @@ from app.models.staff import StaffUserDB
 from app.models.order import OrderDB
 
 
+# Default allowed frontend origins
+DEFAULT_FRONTEND_URLS = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+    "https://supportiq-ai-ten.vercel.app",
+    "https://supportiq-du9ldifwt-sandeshstha0s-projects.vercel.app",
+    "https://supportiq-ai-agent.vercel.app",
+    "https://supportiq-ai-fontend.onrender.com",
+]
+
+
+def get_allowed_origins() -> list[str]:
+    """
+    Load frontend origins from FRONTEND_URLS.
+
+    If FRONTEND_URLS is not configured, use the defaults.
+    If configured, use the environment values plus the defaults.
+    """
+    configured_urls = os.getenv("FRONTEND_URLS", "")
+
+    environment_origins = [
+        origin.strip().rstrip("/")
+        for origin in configured_urls.split(",")
+        if origin.strip()
+    ]
+
+    origins = DEFAULT_FRONTEND_URLS + environment_origins
+
+    # Remove duplicates while preserving order.
+    return list(dict.fromkeys(origins))
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize application resources."""
@@ -45,20 +77,8 @@ app = FastAPI(
 )
 
 
-
 # CORS configuration
-# Supports local development and deployed frontend domains.
-allowed_origins = [
-    origin.strip().rstrip("/")
-    for origin in os.getenv(
-        "FRONTEND_URLS",
-        "http://localhost:4200,"
-        "http://127.0.0.1:4200,"
-        "https://supportiq-ai-ten.vercel.app,"
-        "https://supportiq-du9ldifwt-sandeshstha0s-projects.vercel.app",
-    ).split(",")
-    if origin.strip()
-]
+allowed_origins = get_allowed_origins()
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,7 +98,7 @@ def home():
     }
 
 
-# Health check endpoint for Render
+# Health check endpoint
 @app.get("/health")
 def health_check():
     return {
