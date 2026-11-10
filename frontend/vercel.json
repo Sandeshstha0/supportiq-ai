@@ -1,3 +1,4 @@
+
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
@@ -5,11 +6,11 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/vercel/index"
+      "destination": "/api"
     }
   ],
   "functions": {
-    "vercel/index.mjs": {
+    "api/index.mjs": {
       "includeFiles": "dist/frontend/**"
     }
   }
