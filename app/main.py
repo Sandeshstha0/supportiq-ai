@@ -52,6 +52,8 @@ allowed_origins = [
     for origin in os.getenv(
         "FRONTEND_URLS",
         "http://localhost:4200,http://127.0.0.1:4200",
+         "https://supportiq-ai-ten.vercel.app",
+        "https://supportiq-du9ldifwt-sandeshstha0s-projects.vercel.app",
     ).split(",")
     if origin.strip()
 ]
