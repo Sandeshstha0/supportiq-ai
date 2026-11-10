@@ -1,4 +1,3 @@
-
 <aside
   [class.w-20]="collapsed()"
   [class.w-72]="!collapsed()"
@@ -12,18 +11,31 @@
   >
     @if (!collapsed()) {
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20">
-          <span class="text-2xl font-bold">S</span>
+        <div
+          class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20"
+        >
+          <img
+            src="/chatbotlogo.png"
+            alt="NexaSupport AI Logo"
+            class="h-full w-full object-contain"
+          />
         </div>
 
         <div>
-          <h1 class="text-lg font-bold">SupportIQ AI</h1>
+          <h1 class="text-lg font-bold">NexaSupport AI</h1>
           <p class="text-xs text-slate-400">Powered by Lasata</p>
         </div>
       </div>
     } @else {
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-2xl font-bold">
-        S
+     
+      <div
+        class="flex h-11 w-38 items-center justify-center overflow-hidden rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20"
+      >
+        <img
+          src="/chatbotlogo.png"
+          alt="NexaSupport AI Logo"
+          class="h-full w-full object-contain"
+        />
       </div>
     }
 
@@ -147,18 +159,16 @@
       class="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-800"
       [class.justify-center]="collapsed()"
     >
-      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
+      <div
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white"
+      >
         G
       </div>
 
       @if (!collapsed()) {
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-semibold text-white">
-            Guest Customer
-          </p>
-          <p class="text-xs text-slate-500">
-            Lasata Customer
-          </p>
+          <p class="truncate text-sm font-semibold text-white">Guest Customer</p>
+          <p class="text-xs text-slate-500">Lasata Customer</p>
         </div>
 
         <span class="text-slate-500">⋯</span>
